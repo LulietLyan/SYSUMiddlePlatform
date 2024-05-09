@@ -5,11 +5,11 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/router"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -46,7 +46,6 @@ func Execute() error {
 		// 	viper.GetString("ssh.User"),
 		// 	viper.GetString("ssh.Password"),
 		// )
-
 		// if err != nil {
 		// 	return err
 		// }
@@ -63,14 +62,29 @@ func Execute() error {
 		// }
 
 		// mysql.DB.AutoMigrate(&models.User{}, &models.PresetBackground{}) // 将数据库的表自动映射为User
-		var err error
-		mysql.DB, err = gorm.Open("mysql", "root:654321@tcp(47.121.29.57:3307)/mydb?charset=utf8mb4&parseTime=True&loc=Local")
+
+		_, err := mysql.Init( //建立连接
+			viper.GetString("db.hostname"), // 用viper将对应的参数取出来
+			viper.GetInt("db.port"),
+			viper.GetString("db.username"),
+			viper.GetString("db.password"),
+			viper.GetString("db.dbname"),
+		)
 		if err != nil {
 			return err
 		}
-		mysql.DB.Set("gorm:table_options", "charset=utf8mb4").
-			AutoMigrate(&models.User{}).
-			AutoMigrate(&models.PresetBackground{})
+
+		// 测试插入
+		if e := mysql.DB.Create(&models.Admin{
+			Admin_password: "123456",
+			Admin_username: "root",
+		}).Error; e != nil {
+			fmt.Println(e)
+		}
+		//测试删除
+		if e := mysql.DB.Where("Admin_username = ?", "root").Delete(&models.Admin{}).Error; e != nil {
+			fmt.Println(e)
+		}
 
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()

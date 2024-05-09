@@ -1,14 +1,16 @@
 package mysql
 
 import (
+	"backend/models"
 	"context"
 	_ "database/sql"
 	"fmt"
+	"net"
+
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/ssh"
-	"net"
 )
 
 var (
@@ -45,12 +47,32 @@ func DialWithPassword(hostname string, port int, username string, password strin
 }
 
 func Init(hostname string, port int, username string, password string, dbname string) (*gorm.DB, error) {
-	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@mysql+tcp(%s:%d)/%s?charset=utf8&parseTime=True",
-			username, password, hostname, port, dbname))
+	// db, err := gorm.Open("mysql",
+	// 	fmt.Sprintf("%s:%s@mysql+tcp(%s:%d)/%s?charset=utf8&parseTime=True",
+	// 		username, password, hostname, port, dbname))
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// DB = db
+	// return db, nil
+	var err error
+	DB, err = gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, hostname, port, dbname))
 	if err != nil {
 		return nil, err
 	}
-	DB = db
-	return db, nil
+
+	return DB, DB.Set("gorm:table_options", "charset=utf8mb4").
+		AutoMigrate(&models.Admin{}).
+		AutoMigrate(&models.AnalyticalUser{}).
+		AutoMigrate(&models.ProjectTable{}).
+		AutoMigrate(&models.ProjectUser{}).
+		AutoMigrate(&models.ProjectColumn{}).
+		AutoMigrate(&models.Permission{}).
+		AutoMigrate(&models.DingdingProjectUser{}).
+		AutoMigrate(&models.DingdingAnalyticalUser{}).
+		AutoMigrate(&models.Notifications{}).
+		AutoMigrate(&models.PermissionRequest{}).
+		AutoMigrate(&models.Api{}).
+		AutoMigrate(&models.ActivationCode{}).
+		AutoMigrate(&models.ProjectMember{}).Error
 }

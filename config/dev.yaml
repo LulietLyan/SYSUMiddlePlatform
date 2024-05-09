@@ -7,9 +7,15 @@ ssh:
   Type: "KEY"               # 如果用密钥登陆的话才有用，忽视
   Password: Oneadd1@two     # 云服务器密码
   KeyFile: "~/.ssh/id_rsa"  # 如果用密钥登陆的话才有用，忽视
+# db:
+#   hostname: 127.0.0.1       # ssh连接后开发环境变成主机，此时直接用环回自检地址表示数据库IP地址
+#   port: 3306                # 同理端口也是 3306
+#   username: root            # 云服务器上的 sql 用户名，已经不是本地的用户了
+#   password: 123456          # 登陆密码
+#   dbname: demo              # 这是以前的项目的数据库名
 db:
-  hostname: 127.0.0.1       # ssh连接后开发环境变成主机，此时直接用环回自检地址表示数据库IP地址
-  port: 3306                # 同理端口也是 3306
+  hostname: 47.121.29.57       # ssh连接后开发环境变成主机，此时直接用环回自检地址表示数据库IP地址
+  port: 3307               # 同理端口也是 3306
   username: root            # 云服务器上的 sql 用户名，已经不是本地的用户了
-  password: 123456          # 登陆密码
-  dbname: demo              # 这是以前的项目的数据库名
+  password: 654321          # 登陆密码
+  dbname: mydb              # 这是以前的项目的数据库名
