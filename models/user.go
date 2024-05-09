@@ -7,7 +7,7 @@ import (
 // 用户基本属性
 type User struct {
 	gorm.Model
-	Id                    string  `json:"id,string" db:"id"`
+	Uid                   string  `json:"id,string" db:"id"`
 	Password              string  `json:"password" db:"password"`
 	UserName              string  `json:"username" db:"user_name"`
 	Url                   string  `json:"url" db:"url"`

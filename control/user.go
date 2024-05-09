@@ -4,9 +4,10 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/response"
+	"strconv"
+
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 // 注册
@@ -26,7 +27,7 @@ func RegisterHandler(c *gin.Context) {
 			response.Fail(c, nil, "用户名已被使用!")
 		} else if result.Error != nil {
 			var newUser = models.User{
-				Id:                    strconv.FormatUint(uint64(node.Generate().Int64()%10000000000), 10),
+				Uid:                   strconv.FormatUint(uint64(node.Generate().Int64()%10000000000), 10),
 				Password:              userRegister.Password,
 				UserName:              userRegister.UserName,
 				Url:                   "https://baidu.com/",
@@ -50,7 +51,7 @@ func RegisterHandler(c *gin.Context) {
 				Log:                   "",
 			}
 			mysql.DB.Create(&newUser)
-			response.Success(c, gin.H{"id": newUser.Id}, "注册成功!")
+			response.Success(c, gin.H{"id": newUser.Uid}, "注册成功!")
 		}
 	}
 }

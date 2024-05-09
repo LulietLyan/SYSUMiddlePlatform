@@ -5,11 +5,14 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/router"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -38,33 +41,26 @@ func main() {
 func Execute() error {
 	// viper 用来取 config/dev.yaml中的参数
 	rootCmd.RunE = func(cmd *cobra.Command, args []string) error {
-		_, err := mysql.DialWithPassword(
-			viper.GetString("ssh.Host"),
-			viper.GetInt("ssh.Port"),
-			viper.GetString("ssh.User"),
-			viper.GetString("ssh.Password"),
-		)
 
+		var err error
+		mysql.DB, err = gorm.Open("mysql", "root:654321@tcp(47.121.29.57:3307)/mydb?charset=utf8mb4&parseTime=True&loc=Local")
 		if err != nil {
 			return err
 		}
+		mysql.DB.Set("gorm:table_options", "charset=utf8mb4").
+			AutoMigrate(&models.User{}).
+			AutoMigrate(&models.PresetBackground{})
 
-		_, err = mysql.Init(
-			viper.GetString("db.hostname"),
-			viper.GetInt("db.port"),
-			viper.GetString("db.username"),
-			viper.GetString("db.password"),
-			viper.GetString("db.dbname"),
-		) // 用viper将对应的参数取出来
-		if err != nil {
-			return err
+		var users []models.User
+		if err := mysql.DB.Raw("SELECT * FROM user").Scan(&users).Error; err != nil {
+			panic("failed to scan users")
 		}
 
-		mysql.DB.AutoMigrate(&models.User{}, &models.PresetBackground{}) // 将数据库的表自动映射为User
-
+		// 打印所有用户信息
+		fmt.Print(users)
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()
-		defer mysql.SshDatabaseClient.Close()
+		// defer mysql.SshDatabaseClient.Close()
 
 		r := router.SetupRouter() // 初始化路由
 		err = r.Run(":2020")
