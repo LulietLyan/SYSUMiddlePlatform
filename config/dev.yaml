@@ -19,3 +19,10 @@ db:
   username: root            # 云服务器上的 sql 用户名，已经不是本地的用户了
   password: 654321          # 登陆密码
   dbname: mydb              # 这是以前的项目的数据库名
+
+syncdb:
+  hostname: 47.121.29.57       # ssh连接后开发环境变成主机，此时直接用环回自检地址表示数据库IP地址
+  port: 3307               # 同理端口也是 3306
+  username: root            # 云服务器上的 sql 用户名，已经不是本地的用户了
+  password: 654321          # 登陆密码
+  dbname: syncdb              # 这是以前的项目的数据库名

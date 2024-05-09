@@ -13,6 +13,10 @@ type ProjectTable struct {
 	PT_config            string     `gorm:"column:PT_config;type:TEXT" json:"PT_config"`
 	PT_remote_db_name    string     `gorm:"column:PT_remote_db_name;type:VARCHAR(64)" json:"PT_remote_db_name"`
 	PT_remote_table_name string     `gorm:"column:PT_remote_table_name;type:VARCHAR(64)" json:"PT_remote_table_name"`
+	PT_remote_hostname   string     `gorm:"column:PT_remote_hostname;type:VARCHAR(64)" json:"PT_remote_hostname"`
+	PT_remote_port       uint       `gorm:"column:PT_remote_port" json:"PT_remote_port"`
+	PT_remote_username   string     `gorm:"column:PT_remote_username;type:VARCHAR(64)" json:"PT_remote_username"`
+	PT_remote_password   string     `gorm:"column:PT_remote_password;type:VARCHAR(64)" json:"PT_remote_password"`
 	PU_uid               uint       `gorm:"column:PU_uid" json:"PU_uid"`
 }
 

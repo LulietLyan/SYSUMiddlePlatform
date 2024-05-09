@@ -2,11 +2,8 @@ package main
 
 import (
 	"backend/config"
-	"backend/logic"
-	"backend/models"
 	"backend/mysql"
 	"backend/router"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -75,21 +72,21 @@ func Execute() error {
 			return err
 		}
 
-		// 测试插入
-		if e := mysql.DB.Create(&models.Admin{
-			Admin_password: "123456",
-			Admin_username: "root",
-		}).Error; e != nil {
-			fmt.Println(e)
-		}
-		//测试删除
-		if e := mysql.DB.Where("Admin_username = ?", "root").Delete(&models.Admin{}).Error; e != nil {
-			fmt.Println(e)
-		}
-		//尝试获取一个token
-		if token, err := logic.GetToken(123); err == nil {
-			fmt.Println(token)
-		}
+		// // 测试插入
+		// if e := mysql.DB.Create(&models.Admin{
+		// 	Admin_password: "123456",
+		// 	Admin_username: "root",
+		// }).Error; e != nil {
+		// 	fmt.Println(e)
+		// }
+		// //测试删除
+		// if e := mysql.DB.Where("Admin_username = ?", "root").Delete(&models.Admin{}).Error; e != nil {
+		// 	fmt.Println(e)
+		// }
+		// //尝试获取一个对应于token中间件的可以通过的token，放在http请求的头部
+		// if token, err := logic.GetToken(123); err == nil {
+		// 	fmt.Println(token)
+		// }
 
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()
