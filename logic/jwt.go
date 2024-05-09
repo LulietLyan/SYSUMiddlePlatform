@@ -18,3 +18,12 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	})
 	return token, claims, err
 }
+
+func GetToken(userid uint) (string, error) {
+	claims := Claims{
+		UserId: userid,
+	}
+	//尝试获取一个token
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return tokenClaims.SignedString(jwtKey)
+}

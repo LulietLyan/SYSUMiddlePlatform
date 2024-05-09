@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/logic"
 	"backend/models"
 	"backend/mysql"
 	"backend/router"
@@ -84,6 +85,10 @@ func Execute() error {
 		//测试删除
 		if e := mysql.DB.Where("Admin_username = ?", "root").Delete(&models.Admin{}).Error; e != nil {
 			fmt.Println(e)
+		}
+		//尝试获取一个token
+		if token, err := logic.GetToken(123); err == nil {
+			fmt.Println(token)
 		}
 
 		// 最后别忘了把连接关了

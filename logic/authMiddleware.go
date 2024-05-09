@@ -3,13 +3,16 @@ package logic
 import (
 	"backend/models"
 	"backend/mysql"
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("触发中间件")
 		//获取authorization header
 		tokenString := c.GetHeader("Authorization")
 

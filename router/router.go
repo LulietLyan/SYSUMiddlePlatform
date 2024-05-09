@@ -3,6 +3,7 @@ package router
 import (
 	"backend/control"
 	"backend/logic"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
