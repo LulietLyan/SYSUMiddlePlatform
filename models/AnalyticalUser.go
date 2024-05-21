@@ -13,6 +13,7 @@ type AnalyticalUser struct {
 	AU_phone    string     `gorm:"column:AU_phone;type:VARCHAR(20)" json:"AU_phone"`
 	AU_std_uid  string     `gorm:"column:AU_std_uid;type:VARCHAR(20)" json:"AU_std_uid"`
 	AU_email    string     `gorm:"column:AU_email;type:VARCHAR(128)" json:"AU_email"`
+	AU_realname string     `gorm:"column:AU_realname;type:VARCHAR(64)" json:"AU_realname"`
 }
 
 func (AnalyticalUser) TableName() string {
