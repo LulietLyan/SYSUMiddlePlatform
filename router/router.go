@@ -9,12 +9,28 @@ import (
 )
 
 // 用户路由组
-func UserRouterInit(r *gin.RouterGroup) {
-	userManager := r.Group("/user")
+//
+//	func UserRouterInit(r *gin.RouterGroup) {
+//		userManager := r.Group("/user")
+//		{
+//			// 其它的 api 删完了，只放一个示例
+//			userManager.POST("/register", control.RegisterHandler)
+//			userManager.Use(logic.AuthMiddleware())
+//		}
+//	}
+func RouterInit(r *gin.RouterGroup) {
+	api := r.Group("api")
 	{
-		// 其它的 api 删完了，只放一个示例
-		userManager.POST("/register", control.RegisterHandler)
-		userManager.Use(logic.AuthMiddleware())
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", control.UserLogin)
+			auth.POST("/signup", control.SignUp)
+		}
+
+		api.Use(logic.AuthMiddleware()) //应该只影响后面的，如果前面的也受影响，可能是gin版本不同
+		{
+			api.GET("/message", control.GetMessage)
+		}
 	}
 }
 
@@ -27,7 +43,8 @@ func SetupRouter() *gin.Engine {
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
 	router.Use(cors.New(config))
 	api := router.Group("")
-	UserRouterInit(api)
+	RouterInit(api)
+	// UserRouterInit(api)
 	//NewsRouterInit(api)
 	//CommentRouterInit(api)
 	return router

@@ -1,13 +1,29 @@
 package logic
 
 import (
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
 var jwtKey = []byte("a_secret_crect")
 
+// type Claims struct {
+// 	UserId uint
+// 	jwt.StandardClaims
+// }
+
+//	func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
+//		claims := &Claims{}
+//		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (i interface{}, err error) {
+//			return jwtKey, nil
+//		})
+//		return token, claims, err
+//	}
 type Claims struct {
-	UserId uint
+	LoginTime time.Time
+	UserId    uint
+	Identity  string
 	jwt.StandardClaims
 }
 
@@ -19,11 +35,22 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	return token, claims, err
 }
 
-func GetToken(userid uint) (string, error) {
+func GenToken(id uint, identity string) (string, error) {
 	claims := Claims{
-		UserId: userid,
+		LoginTime: time.Now(),
+		UserId:    id,
+		Identity:  identity,
 	}
-	//尝试获取一个token
+	// claims.ExpiresAt = time.Now().Add(3 * time.Hour).Unix()
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return tokenClaims.SignedString(jwtKey)
 }
+
+// func GetToken(userid uint) (string, error) {
+// 	claims := Claims{
+// 		UserId: userid,
+// 	}
+// 	//尝试获取一个token
+// 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	return tokenClaims.SignedString(jwtKey)
+// }

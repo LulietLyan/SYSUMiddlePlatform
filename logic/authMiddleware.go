@@ -1,9 +1,6 @@
 package logic
 
 import (
-	"backend/models"
-	"backend/mysql"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -12,7 +9,7 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("触发中间件")
+		// fmt.Println("触发中间件")
 		//获取authorization header
 		tokenString := c.GetHeader("Authorization")
 
@@ -27,16 +24,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, claims, err := ParseToken(tokenString)
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "权限不足"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "token无效"})
 			c.Abort()
 			return
 		}
 
 		//验证通过后获取claims中的Id
 		userId := claims.UserId
-		var user models.User
-		mysql.DB.First(&user, userId) //默认用户存在
-		c.Set("user", user)
+		identity := claims.Identity
+		// var user models.User
+		// mysql.DB.First(&user, userId) //默认用户存在
+		c.Set("userId", userId)
+		c.Set("identity", identity)
 		c.Next()
 	}
 }
