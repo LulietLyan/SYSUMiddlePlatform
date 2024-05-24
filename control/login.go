@@ -31,7 +31,6 @@ func UserLogin(c *gin.Context) {
 			} else {
 				response.Fail(c, nil, "用户名不存在")
 			}
-			break
 		case "Analyzer":
 			var auRecord models.AnalyticalUser
 			if e = mysql.DB.Where("AU_username = ?", m.UserName).First(&auRecord).Error; e == nil {
@@ -44,7 +43,6 @@ func UserLogin(c *gin.Context) {
 			} else {
 				response.Fail(c, nil, "用户名不存在")
 			}
-			break
 		case "Developer":
 			var puRecord models.ProjectUser
 			if e = mysql.DB.Where("PU_username = ?", m.UserName).First(&puRecord).Error; e == nil {
@@ -57,7 +55,6 @@ func UserLogin(c *gin.Context) {
 			} else {
 				response.Fail(c, nil, "用户名不存在")
 			}
-			break
 		default:
 			response.Fail(c, nil, "Identity参数为未知值")
 		}

@@ -81,7 +81,6 @@ func SignUp(c *gin.Context) {
 				return
 			}
 			response.Success(c, gin.H{"username": m.UserName}, "")
-			break
 		case "Analyzer":
 			var auRecord models.AnalyticalUser
 			if e := tx.Where("AU_username=?", m.UserName).First(&auRecord).Error; e == nil {
@@ -113,7 +112,6 @@ func SignUp(c *gin.Context) {
 				return
 			}
 			response.Success(c, gin.H{"username": m.UserName}, "")
-			break
 		case "Developer":
 			var puRecord models.ProjectUser
 			if e := tx.Where("PU_username=?", m.UserName).First(&puRecord).Error; e == nil {
@@ -142,7 +140,6 @@ func SignUp(c *gin.Context) {
 				return
 			}
 			response.Success(c, gin.H{"username": m.UserName}, "")
-			break
 		default:
 			response.Fail(c, nil, "Identity参数为未知值")
 		}
