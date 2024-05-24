@@ -8,10 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetMessage(c *gin.Context) {
+func GetMessageSearch(c *gin.Context) {
 	type msg struct {
-		Offset uint `form:"offset"`
-		Limit  uint `form:"limit"`
+		Offset uint   `form:"offset"`
+		Limit  uint   `form:"limit"`
+		Search string `form:"search"`
 	}
 
 	var m msg
@@ -34,21 +35,21 @@ func GetMessage(c *gin.Context) {
 		} else {
 			userId = data.(uint)
 		}
-
+		search := "%" + m.Search + "%"
 		var nRecords []models.Notifications
 		switch identity {
 		case "Admin":
-			if e := mysql.DB.Order("UpdatedAt DESC").Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("UpdatedAt DESC").Where("N_Title like ? OR N_Body like ?", search, search).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
 		case "Analyzer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("UpdateAt DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
 		case "Developer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("UpdateAt DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
@@ -64,6 +65,7 @@ func GetMessage(c *gin.Context) {
 			Author  string `json:"author"`
 			Time    string `json:"time"`
 		}
+
 		var messages []message
 		for _, mRecord := range nRecords {
 			messages = append(messages, message{Id: mRecord.N_uid, Title: mRecord.N_Title, Content: mRecord.N_Body, Author: "数据中台管理团队", Time: mRecord.UpdatedAt.Format("2006-01-02 15:04")})

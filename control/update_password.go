@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 验证发来的用户名和密码（可能报告账号不存在或者密码错误），并生成一个token，随完整用户数据一起返回
 func UpdatePassword(c *gin.Context) {
 	type msg struct {
 		OldPwd     string `json:"oldpwd"`
