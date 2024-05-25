@@ -10,13 +10,13 @@ import (
 
 func GetMessageSearch(c *gin.Context) {
 	type msg struct {
-		Offset uint   `form:"offset"`
-		Limit  uint   `form:"limit"`
-		Search string `form:"search"`
+		Offset uint   `json:"offset"`
+		Limit  uint   `json:"limit"`
+		Search string `json:"search"`
 	}
 
 	var m msg
-	if e := c.ShouldBindQuery(&m); e == nil {
+	if e := c.ShouldBindJSON(&m); e == nil {
 		if m.Limit == 0 {
 			m.Limit = 15
 		}
@@ -36,6 +36,7 @@ func GetMessageSearch(c *gin.Context) {
 			userId = data.(uint)
 		}
 		search := "%" + m.Search + "%"
+		println(search)
 		var nRecords []models.Notifications
 		switch identity {
 		case "Admin":
@@ -44,12 +45,12 @@ func GetMessageSearch(c *gin.Context) {
 				return
 			}
 		case "Analyzer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
 		case "Developer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Where("(N_Title like ? OR N_Body like ?) AND (N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?))", search, search, userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}

@@ -4,7 +4,6 @@ import (
 	"backend/control"
 	"backend/logic"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,20 +27,31 @@ func RouterInit(r *gin.RouterGroup) {
 		}
 
 		api.Use(logic.AuthMiddleware()) //应该只影响后面的，如果前面的也受影响，可能是gin版本不同
+		user := api.Group("/user")
 		{
-			api.GET("/message", control.GetMessage)
+			user.PUT("/password", control.UpdatePassword)
 		}
+		message := api.Group("/message")
+		{
+			message.GET("", control.GetMessage)
+			message.GET("/pages", control.GetMessagePageNum)
+			message.POST("/search", control.GetMessageSearch)
+			message.POST("/search/pages", control.GetMessagePageNumSearch)
+			message.DELETE("", control.DeleteMessage)
+		}
+		api.GET("/project", control.GetProjectBrief)
+		api.GET("/projectDetail", control.GetProjectDetail)
 	}
 }
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	// 添加CORS中间件
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
-		"http://localhost:8084", "http://localhost:8085"} // 允许访问的域名
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
-	router.Use(cors.New(config))
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"http://localhost:2020", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
+	// 	"http://localhost:8084", "http://localhost:8085"} // 允许访问的域名
+	// config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
+	// router.Use(cors.New(config))
 	api := router.Group("")
 	RouterInit(api)
 	// UserRouterInit(api)

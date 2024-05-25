@@ -10,7 +10,7 @@ import (
 
 func GetProjectDetail(c *gin.Context) {
 	type msg struct {
-		Projectname string `json:"projectname"`
+		Projectname string `form:"projectname"`
 	}
 	var m msg
 	if e := c.ShouldBindQuery(&m); e == nil {
@@ -75,7 +75,7 @@ func GetProjectDetail(c *gin.Context) {
 			}
 			var cs []column
 			for _, pcRecord := range pcRecords {
-				cs = append(cs, column{ColumnName: pcRecord.PC_name, ColumnType: "暂无", IsNotNull: false, IsPrimaryKey: false, IsForeignKey: false, Desc: pcRecord.PC_description})
+				cs = append(cs, column{ColumnName: pcRecord.PC_name, ColumnType: "暂无", IsNotNull: true, IsPrimaryKey: false, IsForeignKey: false, Desc: pcRecord.PC_description})
 			}
 			ts = append(ts, table{TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs})
 		}

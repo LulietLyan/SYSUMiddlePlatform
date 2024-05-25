@@ -43,12 +43,12 @@ func GetMessage(c *gin.Context) {
 				return
 			}
 		case "Analyzer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Where("N_type = 2 OR N_type = 3 OR (N_type = 5 AND AU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
 		case "Developer":
-			if e := mysql.DB.Order("UpdateAt DESC").Where("N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Where("N_type = 1 OR N_type = 3 OR (N_type = 4 AND PU_uid = ?)", userId).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}

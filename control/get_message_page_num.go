@@ -14,12 +14,12 @@ func GetMessagePageNum(c *gin.Context) {
 		Limit uint `form:"limit"`
 	}
 	var m msg
-	if e := c.ShouldBindJSON(&m); e == nil {
+	if e := c.ShouldBindQuery(&m); e == nil {
 		if m.Limit == 0 {
 			m.Limit = 15
 		}
 		var count int64
-		if e := mysql.DB.Model(&models.Notifications{}).Count(&count); e != nil {
+		if e := mysql.DB.Model(&models.Notifications{}).Count(&count).Error; e != nil {
 			response.Fail(c, nil, "查找通知数量时出错")
 			return
 		} else {
@@ -27,7 +27,9 @@ func GetMessagePageNum(c *gin.Context) {
 			if count%int64(m.Limit) != 0 {
 				pages++
 			}
-			response.Success(c, gin.H{"pages": pages / 15}, "")
+			response.Success(c, gin.H{"pages": pages}, "")
 		}
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
 	}
 }

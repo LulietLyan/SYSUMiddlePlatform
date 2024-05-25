@@ -10,12 +10,12 @@ import (
 
 func GetMessagePageNumSearch(c *gin.Context) {
 	type msg struct {
-		Limit  uint   `form:"limit"`
-		Search string `form:"search"`
+		Limit  uint   `json:"limit"`
+		Search string `json:"search"`
 	}
 
 	var m msg
-	if e := c.ShouldBindQuery(&m); e == nil {
+	if e := c.ShouldBindJSON(&m); e == nil {
 		if m.Limit == 0 {
 			m.Limit = 15
 		}
@@ -56,12 +56,12 @@ func GetMessagePageNumSearch(c *gin.Context) {
 			response.Fail(c, nil, "Identity参数为未知值")
 			return
 		}
-
+		print(count)
 		pages := count / int64(m.Limit)
 		if count%int64(m.Limit) != 0 {
 			pages++
 		}
-		response.Success(c, gin.H{"pages": pages / 15}, "")
+		response.Success(c, gin.H{"pages": pages}, "")
 
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
