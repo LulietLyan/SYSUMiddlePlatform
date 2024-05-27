@@ -3,7 +3,9 @@ package control
 import (
 	"backend/models"
 	"backend/mysql"
+	"backend/response"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 	"os/exec"
 )
@@ -93,4 +95,85 @@ func InitDataSync() error {
 		}
 	}
 	return nil
+}
+
+func NewProjectTable(c *gin.Context) {
+	type table struct {
+		ProjectId    uint   `json:"project_id"`
+		DatabaseName string `json:"database_name"`
+		TableName    string `json:"table_name"`
+		TableConfig  string `json:"table_config"`
+		HostName     string `json:"host_name"`
+		UserName     string `json:"user_name"`
+		Password     string `json:"password"`
+		Port         uint   `json:"port"`
+	}
+	var t table
+
+	if e := c.ShouldBindJSON(&t); e == nil {
+		var projectTable models.ProjectTable
+		projectTable = models.ProjectTable{
+			PU_uid:               t.ProjectId,
+			PT_remote_db_name:    t.DatabaseName,
+			PT_remote_table_name: t.TableName,
+			PT_config:            t.TableConfig,
+			PT_remote_hostname:   t.HostName,
+			PT_remote_username:   t.UserName,
+			PT_remote_password:   t.Password,
+			PT_remote_port:       t.Port,
+		}
+
+		tx := mysql.DB.Begin()
+		if e := tx.Create(&projectTable).Error; e != nil {
+			tx.Rollback()
+			response.Fail(c, nil, "插入新项目表时出错")
+			return
+		}
+		if e := tx.Commit().Error; e != nil {
+			response.Fail(c, nil, "提交事务时出错")
+			return
+		}
+		response.Success(c, gin.H{"project_id": t.ProjectId}, "")
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
+	}
+}
+
+func UpdateProjectTable(c *gin.Context) {
+	type table struct {
+		Id           uint   `json:"id"`
+		ProjectId    uint   `json:"project_id"`
+		DatabaseName string `json:"database_name"`
+		TableName    string `json:"table_name"`
+		TableConfig  string `json:"table_config"`
+		HostName     string `json:"host_name"`
+		UserName     string `json:"user_name"`
+		Password     string `json:"password"`
+		Port         uint   `json:"port"`
+	}
+	var t table
+
+	if e := c.ShouldBindJSON(&t); e == nil {
+		var projectTable models.ProjectTable
+
+		tx := mysql.DB.Begin()
+		if e := tx.Where("PT_uid = ?", t.Id).First(&projectTable).Error; e != nil {
+			tx.Rollback()
+			response.Fail(c, nil, "找不到项目表")
+			return
+		}
+		projectTable.PT_config = t.TableConfig
+		if e := tx.Save(&projectTable).Error; e != nil {
+			tx.Rollback()
+			response.Fail(c, nil, "更新项目表结构时出错")
+			return
+		}
+		if e := tx.Commit().Error; e != nil {
+			response.Fail(c, nil, "提交事务时出错")
+			return
+		}
+		response.Success(c, nil, "")
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
+	}
 }

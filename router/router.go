@@ -39,7 +39,12 @@ func RouterInit(r *gin.RouterGroup) {
 			message.POST("/search/pages", control.GetMessagePageNumSearch)
 			message.DELETE("", control.DeleteMessage)
 		}
-		api.GET("/project", control.GetProjectBrief)
+		project := api.Group("/project")
+		{
+			project.GET("", control.GetProjectBrief)
+			project.POST("/newprojecttable", control.NewProjectTable)
+			project.PUT("/upprojecttable", control.UpdateProjectTable)
+		}
 		api.GET("/projectDetail", control.GetProjectDetail)
 	}
 }
