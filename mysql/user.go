@@ -15,6 +15,7 @@ import (
 
 var (
 	DB                *gorm.DB
+	DB_flink          *gorm.DB
 	SshDatabaseClient *ssh.Client
 )
 
@@ -61,6 +62,7 @@ func Init(hostname string, port int, username string, password string, dbname st
 		return nil, err
 	}
 
+	DB_flink, _ = InitFlink(hostname, port, username, password, "flink_target")
 	return DB, DB.Set("gorm:table_options", "charset=utf8mb4").
 		AutoMigrate(&models.Admin{}).
 		AutoMigrate(&models.AnalyticalUser{}).

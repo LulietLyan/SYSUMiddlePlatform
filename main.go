@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/control"
 	"backend/mysql"
 	"backend/router"
 	"log"
@@ -69,6 +70,9 @@ func Execute() error {
 			viper.GetString("db.dbname"),
 		)
 		if err != nil {
+			return err
+		}
+		if err = control.InitDataSync(); err != nil {
 			return err
 		}
 
