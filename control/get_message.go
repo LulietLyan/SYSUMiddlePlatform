@@ -66,7 +66,7 @@ func GetMessage(c *gin.Context) {
 		}
 		var messages []message
 		for _, mRecord := range nRecords {
-			messages = append(messages, message{Id: mRecord.N_uid, Title: mRecord.N_Title, Content: mRecord.N_Body, Author: "数据中台管理团队", Time: mRecord.UpdatedAt.Format("2006-01-02 15:04")})
+			messages = append(messages, message{Id: mRecord.N_uid, Title: mRecord.N_Title, Content: mRecord.N_Body, Author: "数据中台管理团队", Time: mRecord.CreatedAt.Format("2006-01-02 15:04")})
 		}
 		response.Success(c, gin.H{"messages": messages}, "")
 

@@ -40,7 +40,7 @@ func GetMessageSearch(c *gin.Context) {
 		var nRecords []models.Notifications
 		switch identity {
 		case "Admin":
-			if e := mysql.DB.Order("UpdatedAt DESC").Where("N_Title like ? OR N_Body like ?", search, search).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Where("N_Title like ? OR N_Body like ?", search, search).Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}
@@ -69,7 +69,7 @@ func GetMessageSearch(c *gin.Context) {
 
 		var messages []message
 		for _, mRecord := range nRecords {
-			messages = append(messages, message{Id: mRecord.N_uid, Title: mRecord.N_Title, Content: mRecord.N_Body, Author: "数据中台管理团队", Time: mRecord.UpdatedAt.Format("2006-01-02 15:04")})
+			messages = append(messages, message{Id: mRecord.N_uid, Title: mRecord.N_Title, Content: mRecord.N_Body, Author: "数据中台管理团队", Time: mRecord.CreatedAt.Format("2006-01-02 15:04")})
 		}
 		response.Success(c, gin.H{"messages": messages}, "")
 

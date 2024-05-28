@@ -13,6 +13,7 @@ type Api struct {
 	A_respond     string     `gorm:"column:A_respond;type:VARCHAR(5000)" json:"A_respond"`
 	A_description string     `gorm:"column:A_description;type:VARCHAR(2048)" json:"A_description"`
 	A_type        uint       `gorm:"column:A_type" json:"A_type"`
+	A_name        string     `gorm:"column:A_name;type:VARCHAR(64)" json:"A_name"`
 }
 
 func (Api) TableName() string {

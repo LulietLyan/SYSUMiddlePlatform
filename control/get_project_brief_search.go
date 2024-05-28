@@ -7,13 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetProjectBrief(c *gin.Context) {
+func GetProjectBriefSearch(c *gin.Context) {
 	type msg struct {
-		Offset uint `form:"offset"`
-		Limit  uint `form:"limit"`
+		Offset uint   `json:"offset"`
+		Limit  uint   `json:"limit"`
+		Search string `json:"search"`
 	}
 	var m msg
-	if e := c.ShouldBindQuery(&m); e != nil {
+	if e := c.ShouldBindJSON(&m); e != nil {
 		response.Fail(c, nil, "数据格式错误!")
 	}
 
@@ -23,9 +24,10 @@ func GetProjectBrief(c *gin.Context) {
 		PU_logo_url    string `gorm:"column:PU_logo_url;type:VARCHAR(1024)" json:"PU_logo_url"`
 		PU_uid         uint   `gorm:"column:PU_uid" json:"PU_uid"`
 	}
+	search := "%" + m.Search + "%"
 	if e := mysql.DB.Table("User").
 		Select("User.U_username, ProjectUser.PU_logo_url,ProjectUser.PU_description,ProjectUser.PU_uid").
-		Joins("left join ProjectUser on User.U_uid = ProjectUser.U_uid").Offset(m.Offset).Limit(m.Limit).
+		Joins("left join ProjectUser on User.U_uid = ProjectUser.U_uid").Where("User.U_username like ?", search).Offset(m.Offset).Limit(m.Limit).
 		Find(&results).Error; e != nil {
 		response.Fail(c, nil, "查找项目时出错")
 		return

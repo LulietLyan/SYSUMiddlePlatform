@@ -18,6 +18,8 @@ import (
 //		}
 //	}
 func RouterInit(r *gin.RouterGroup) {
+
+	r.Static("/logo", "./image")
 	api := r.Group("api")
 	{
 		auth := api.Group("/auth")
@@ -33,15 +35,19 @@ func RouterInit(r *gin.RouterGroup) {
 		}
 		message := api.Group("/message")
 		{
+			message.DELETE("", control.DeleteMessage)
 			message.GET("", control.GetMessage)
 			message.GET("/pages", control.GetMessagePageNum)
 			message.POST("/search", control.GetMessageSearch)
 			message.POST("/search/pages", control.GetMessagePageNumSearch)
-			message.DELETE("", control.DeleteMessage)
 		}
+		api.POST("/applyauth", control.ApplyForTableAuth)
 		project := api.Group("/project")
 		{
 			project.GET("", control.GetProjectBrief)
+			project.GET("/pages", control.GetProjectPageNum)
+			project.POST("/search", control.GetProjectBriefSearch)
+			project.POST("/search/pages", control.GetProjectPageNumSearch)
 			project.POST("/newprojecttable", control.NewProjectTable)
 			project.PUT("/upprojecttable", control.UpdateProjectTable)
 		}

@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetMessagePageNum(c *gin.Context) {
+func GetProjectPageNum(c *gin.Context) {
 	type msg struct {
 		Limit uint `form:"limit"`
 	}
@@ -18,7 +18,7 @@ func GetMessagePageNum(c *gin.Context) {
 			m.Limit = 15
 		}
 		var count int64
-		if e := mysql.DB.Model(&models.Notifications{}).Count(&count).Error; e != nil {
+		if e := mysql.DB.Model(&models.ProjectUser{}).Count(&count).Error; e != nil {
 			response.Fail(c, nil, "查找通知数量时出错")
 			return
 		} else {
