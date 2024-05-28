@@ -41,16 +41,21 @@ func GetProjectDetail(c *gin.Context) {
 			Tables      []table  `json:"tables"`
 		}
 		//查找ProjectUser表
-		var puRecord models.ProjectUser
-		if e := mysql.DB.Where("PU_username = ?", m.Projectname).First(&puRecord).Error; e != nil {
+		var result struct {
+			PU_logo_url    string `gorm:"column:PU_logo_url;type:VARCHAR(1024)" json:"PU_logo_url"`
+			U_username     string `gorm:"column:U_username;type:VARCHAR(64)" json:"U_username"`
+			PU_description string `gorm:"column:PU_description;type:VARCHAR(8192)" json:"PU_description"`
+			PU_uid         uint   `gorm:"column:PU_uid" json:"PU_uid"`
+		}
+		if e := mysql.DB.Table("User").Select("ProjectUser.PU_logo_url,User.U_username,ProjectUser.PU_description,ProjectUser.PU_uid").Joins("Join ProjectUser on User.U_uid = ProjectUser.U_uid").First(&result).Error; e != nil {
 			response.Fail(c, nil, "查找项目时出错")
 			return
 		}
 		var pd projectDetail
-		pd.Logo, pd.ProjectName, pd.Description = puRecord.PU_logo_url, puRecord.PU_username, puRecord.PU_description
+		pd.Logo, pd.ProjectName, pd.Description = result.PU_logo_url, result.U_username, result.PU_description
 		//查找ProjectMember表
 		var pmRecords []models.ProjectMember
-		if e := mysql.DB.Where("PU_uid = ?", puRecord.PU_uid).Find(&pmRecords).Error; e != nil {
+		if e := mysql.DB.Where("PU_uid = ?", result.PU_uid).Find(&pmRecords).Error; e != nil {
 			response.Fail(c, nil, "查找项目成员时出错")
 			return
 		}
@@ -61,7 +66,7 @@ func GetProjectDetail(c *gin.Context) {
 		pd.Members = ms
 		//查找ProjectTable表
 		var ptRecords []models.ProjectTable
-		if e := mysql.DB.Where("PU_uid = ?", puRecord.PU_uid).Find(&ptRecords).Error; e != nil {
+		if e := mysql.DB.Where("PU_uid = ?", result.PU_uid).Find(&ptRecords).Error; e != nil {
 			response.Fail(c, nil, "查找项目数据表时出错")
 			return
 		}

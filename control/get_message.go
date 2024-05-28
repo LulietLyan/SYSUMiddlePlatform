@@ -38,7 +38,7 @@ func GetMessage(c *gin.Context) {
 		var nRecords []models.Notifications
 		switch identity {
 		case "Admin":
-			if e := mysql.DB.Order("UpdatedAt DESC").Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Offset(m.Offset).Limit(m.Limit).Find(&nRecords).Error; e != nil {
 				response.Fail(c, nil, "查找通知时出错")
 				return
 			}

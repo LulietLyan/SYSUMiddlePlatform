@@ -23,6 +23,7 @@ func SignUp(c *gin.Context) {
 	}
 	var m msg
 	if e := c.ShouldBindJSON(&m); e == nil {
+		//检查邀请码
 		var acRecord models.ActivationCode
 		tx := mysql.DB.Begin()
 		e := tx.Where("AC_code=?", m.Invitecode).First(&acRecord).Error
@@ -38,58 +39,29 @@ func SignUp(c *gin.Context) {
 			response.Fail(c, nil, "邀请码已失效")
 			return
 		}
-
-		if acType[acRecord.AC_type-1] != m.Identity {
+		uType := acRecord.AC_type - 1
+		if acType[uType] != m.Identity {
 			var acTypeName = [3]string{"开发", "数据分析", "管理"}
 			tx.Rollback()
 			response.Fail(c, nil, "该邀请码只能用于创建"+acTypeName[acRecord.AC_type-1]+"用户")
 			return
 		}
-
+		//检查输入的密码
 		if m.Password1 != m.Password2 {
 			tx.Rollback()
 			response.Fail(c, nil, "两次输入的密码不一致")
 		}
-
-		switch m.Identity {
-		case "Admin":
-			//检查用户名不重复
-			var adminRecord models.Admin
-			if e := tx.Where("Admin_username=?", m.UserName).First(&adminRecord).Error; e == nil {
-				tx.Rollback()
-				response.Fail(c, nil, "用户名已存在")
-				return
-			}
-			adminRecord = models.Admin{
-				Admin_password: m.Password1,
-				Admin_username: m.UserName,
-			}
-			if e := tx.Create(&adminRecord).Error; e != nil {
-				tx.Rollback()
-				response.Fail(c, nil, "插入新用户信息时出错")
-				return
-			}
-			acRecord.AC_usable = 0
-			if e := tx.Save(&acRecord).Error; e != nil {
-				tx.Rollback()
-				response.Fail(c, nil, "更新邀请码状态时出错")
-				return
-			}
-			if e := tx.Commit().Error; e != nil {
-				response.Fail(c, nil, "提交事务时出错")
-				return
-			}
-			response.Success(c, gin.H{"username": m.UserName}, "")
-		case "Analyzer":
-			var auRecord models.AnalyticalUser
-			if e := tx.Where("AU_username=?", m.UserName).First(&auRecord).Error; e == nil {
-				tx.Rollback()
-				response.Fail(c, nil, "用户名已存在")
-				return
-			}
-			auRecord = models.AnalyticalUser{
-				AU_password: m.Password1,
-				AU_username: m.UserName,
+		//向user表添加记录
+		userRecord := models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType}
+		if e := tx.Create(&userRecord).Error; e != nil {
+			tx.Rollback()
+			response.Fail(c, nil, "插入新用户信息时出错")
+			return
+		}
+		//如果注册的用户是开发用户或分析用户，向相应表补充额外数据
+		if uType == 2 {
+			auRecord := models.AnalyticalUser{
+				U_uid:       userRecord.U_uid,
 				AU_phone:    m.Phone,
 				AU_std_uid:  m.Id,
 				AU_email:    m.Email,
@@ -97,51 +69,33 @@ func SignUp(c *gin.Context) {
 			}
 			if e := tx.Create(&auRecord).Error; e != nil {
 				tx.Rollback()
-				response.Fail(c, nil, "插入新用户信息时出错")
+				response.Fail(c, nil, "插入分析用户信息时出错")
 				return
 			}
-			acRecord.AC_usable = 0
-			if e := tx.Save(&acRecord).Error; e != nil {
-				tx.Rollback()
-				response.Fail(c, nil, "更新邀请码状态时出错")
-				return
-			}
-			if e := tx.Commit().Error; e != nil {
-				response.Fail(c, nil, "提交事务时出错")
-				return
-			}
-			response.Success(c, gin.H{"username": m.UserName}, "")
-		case "Developer":
-			var puRecord models.ProjectUser
-			if e := tx.Where("PU_username=?", m.UserName).First(&puRecord).Error; e == nil {
-				tx.Rollback()
-				response.Fail(c, nil, "用户名已存在")
-				return
-			}
-			puRecord = models.ProjectUser{
-				PU_password: m.Password1,
-				PU_username: m.UserName,
-				PU_email:    m.Email,
+		} else if uType == 1 {
+			puRecord := models.ProjectUser{
+				U_uid:    userRecord.U_uid,
+				PU_email: m.Email,
 			}
 			if e := tx.Create(&puRecord).Error; e != nil {
 				tx.Rollback()
-				response.Fail(c, nil, "插入新用户信息时出错")
+				response.Fail(c, nil, "插入项目用户信息时出错")
 				return
 			}
-			acRecord.AC_usable = 0
-			if e := tx.Save(&acRecord).Error; e != nil {
-				tx.Rollback()
-				response.Fail(c, nil, "更新邀请码状态时出错")
-				return
-			}
-			if e := tx.Commit().Error; e != nil {
-				response.Fail(c, nil, "提交事务时出错")
-				return
-			}
-			response.Success(c, gin.H{"username": m.UserName}, "")
-		default:
-			response.Fail(c, nil, "Identity参数为未知值")
 		}
+		//将邀请码设置为失效
+		acRecord.AC_usable = 0
+		if e := tx.Save(&acRecord).Error; e != nil {
+			tx.Rollback()
+			response.Fail(c, nil, "更新邀请码状态时出错")
+			return
+		}
+		//提交事务
+		if e := tx.Commit().Error; e != nil {
+			response.Fail(c, nil, "提交事务时出错")
+			return
+		}
+		response.Success(c, gin.H{"username": m.UserName}, "")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
 	}
