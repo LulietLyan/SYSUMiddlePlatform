@@ -49,7 +49,6 @@ func RouterInit(r *gin.RouterGroup) {
 			project.POST("/search", control.GetProjectBriefSearch)
 			project.POST("/search/pages", control.GetProjectPageNumSearch)
 			project.POST("/newprojecttable", control.NewProjectTable)
-			project.PUT("/upprojecttable", control.UpdateProjectTable)
 		}
 		api.GET("/projectDetail", control.GetProjectDetail)
 	}
