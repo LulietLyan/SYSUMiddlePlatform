@@ -68,7 +68,6 @@ func Init(hostname string, port int, username string, password string, dbname st
 		AutoMigrate(&models.AnalyticalUser{}).
 		AutoMigrate(&models.ProjectTable{}).
 		AutoMigrate(&models.ProjectUser{}).
-		AutoMigrate(&models.ProjectColumn{}).
 		AutoMigrate(&models.Permission{}).
 		AutoMigrate(&models.DingdingProjectUser{}).
 		AutoMigrate(&models.DingdingAnalyticalUser{}).

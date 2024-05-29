@@ -3,7 +3,6 @@ package router
 import (
 	"backend/control"
 	"backend/logic"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,6 +48,8 @@ func RouterInit(r *gin.RouterGroup) {
 			project.POST("/search", control.GetProjectBriefSearch)
 			project.POST("/search/pages", control.GetProjectPageNumSearch)
 			project.POST("/newprojecttable", control.NewProjectTable)
+			project.GET("/getprojecttable", control.GetProjectTable)
+			project.GET("/getallprojecttable", control.GetAllProjectTable)
 		}
 		api.GET("/projectDetail", control.GetProjectDetail)
 	}

@@ -70,27 +70,6 @@ func InitDataSync() error {
 			log.Fatalf("failed to connect database: %v", err)
 			return err
 		}
-		QueryColumnSQL := fmt.Sprintf("SELECT "+
-			"COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, COLUMN_KEY, COLUMN_COMMENT "+
-			"FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' "+
-			"AND TABLE_NAME = '%s' ORDER BY ORDINAL_POSITION;",
-			todoList[index].PT_remote_db_name,
-			todoList[index].PT_remote_table_name)
-		var columns []struct {
-			ColumnName    string `gorm:"column:COLUMN_NAME"`
-			DataType      string `gorm:"column:DATA_TYPE"`
-			ColumnDefault string `gorm:"column:COLUMN_DEFAULT"`
-			IsNullable    string `gorm:"column:IS_NULLABLE"`
-			ColumnKey     string `gorm:"column:COLUMN_KEY"`
-			ColumnComment string `gorm:"column:COLUMN_COMMENT"`
-		}
-		if err := tmp.Raw(QueryColumnSQL).Scan(&columns).Error; err != nil {
-			log.Fatalf("failed to query columns: %v", err)
-			return err
-		}
-		for _, column := range columns {
-			fmt.Println(column)
-		}
 		QueryCreateTableSQL := fmt.Sprintf("SHOW CREATE TABLE %s", todoList[index].PT_remote_table_name)
 		var createSQLResult []struct {
 			TableName   string `gorm:"column:Table"`
@@ -103,7 +82,7 @@ func InitDataSync() error {
 		leftIndex := strings.Index(createSQLResult[0].CreateTable, "(")
 		rightIndex := strings.LastIndex(createSQLResult[0].CreateTable, ")")
 		configStr := createSQLResult[0].CreateTable[leftIndex : rightIndex+1]
-		fmt.Println(configStr)
+
 		re := regexp.MustCompile(`PRIMARY KEY \((.*?)\)`)
 		configStr1 := re.ReplaceAllStringFunc(configStr, func(s string) string {
 			return s + " NOT ENFORCED"
@@ -111,7 +90,7 @@ func InitDataSync() error {
 		re = regexp.MustCompile(`\s*DEFAULT\s+[^,]*\s*,`)
 		configStr1 = re.ReplaceAllString(configStr1, ",")
 		configStr1 = strings.ReplaceAll(configStr1, "datetime", "timestamp")
-		fmt.Println(configStr1)
+
 		if err := tmp.Close(); err != nil {
 			return err
 		}
@@ -136,10 +115,6 @@ func InitDataSync() error {
 		strInsert := fmt.Sprintf("INSERT INTO flink_%s.flink_target_%s select * from flink_%s.flink_source_%s\n",
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name,
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name)
-		fmt.Println(strCreatDatabase)
-		fmt.Println(strSource)
-		fmt.Println(strTarget)
-		fmt.Println(strInsert)
 		// 运行java命令
 		cmd := exec.Command("java",
 			"-cp", "flinkdemo.jar;flink_libs/*",
@@ -159,27 +134,30 @@ func InitDataSync() error {
 
 func NewProjectTable(c *gin.Context) {
 	type table struct {
-		ProjectId    uint   `json:"project_id"`
-		DatabaseName string `json:"database_name"`
-		TableName    string `json:"table_name"`
-		TableConfig  string `json:"table_config"`
-		HostName     string `json:"host_name"`
-		UserName     string `json:"user_name"`
-		Password     string `json:"password"`
-		Port         uint   `json:"port"`
+		Name            string `json:"name"`
+		Description     string `json:"description"`
+		Uid             uint   `json:"uid"`
+		RemoteDbName    string `json:"remote_db_name"`
+		RemoteTableName string `json:"remote_table_name"`
+		RemoteHostname  string `json:"remote_hostname"`
+		RemoteUsername  string `json:"remote_username"`
+		RemotePassword  string `json:"remote_password"`
+		RemotePort      uint   `json:"remote_port"`
 	}
 	var t table
 
 	if e := c.ShouldBindJSON(&t); e == nil {
 		var projectTable models.ProjectTable
 		projectTable = models.ProjectTable{
-			PU_uid:               t.ProjectId,
-			PT_remote_db_name:    t.DatabaseName,
-			PT_remote_table_name: t.TableName,
-			PT_remote_hostname:   t.HostName,
-			PT_remote_username:   t.UserName,
-			PT_remote_password:   t.Password,
-			PT_remote_port:       t.Port,
+			PT_name:              t.Name,
+			PT_description:       t.Description,
+			PU_uid:               t.Uid,
+			PT_remote_db_name:    t.RemoteDbName,
+			PT_remote_table_name: t.RemoteTableName,
+			PT_remote_hostname:   t.RemoteHostname,
+			PT_remote_username:   t.RemoteUsername,
+			PT_remote_password:   t.RemotePassword,
+			PT_remote_port:       t.RemotePort,
 		}
 
 		tx := mysql.DB.Begin()
@@ -192,7 +170,107 @@ func NewProjectTable(c *gin.Context) {
 			response.Fail(c, nil, "提交事务时出错")
 			return
 		}
-		response.Success(c, gin.H{"project_id": t.ProjectId}, "")
+		response.Success(c, gin.H{}, "")
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
+	}
+}
+
+func GetProjectTable(c *gin.Context) {
+	type table struct {
+		Uid             uint   `json:"uid"`
+		RemoteDbName    string `json:"remote_db_name"`
+		RemoteTableName string `json:"remote_table_name"`
+	}
+	var t table
+
+	if e := c.ShouldBindJSON(&t); e == nil {
+		// 查询特定项目表
+		var projectTable models.ProjectTable
+		if e := mysql.DB.Where("PU_uid = ? and PT_remote_db_name = ? and PT_remote_table_name = ?",
+			t.Uid, t.RemoteDbName, t.RemoteTableName).First(&projectTable).Error; e != nil {
+			response.Fail(c, nil, "不存在该项目表!")
+			return
+		}
+		// 获取表字段信息
+		tmp, err := gorm.Open("mysql",
+			fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+				projectTable.PT_remote_username, projectTable.PT_remote_password,
+				projectTable.PT_remote_hostname, projectTable.PT_remote_port, projectTable.PT_remote_db_name))
+		if err != nil {
+			response.Fail(c, nil, "数据库错误!")
+			return
+		}
+		QueryColumnSQL := fmt.Sprintf("SELECT "+
+			"COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, COLUMN_KEY, COLUMN_COMMENT "+
+			"FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '%s' "+
+			"AND TABLE_NAME = '%s' ORDER BY ORDINAL_POSITION;",
+			projectTable.PT_remote_db_name,
+			projectTable.PT_remote_table_name)
+		var columns []struct {
+			ColumnName    string `gorm:"column:COLUMN_NAME"`
+			DataType      string `gorm:"column:DATA_TYPE"`
+			ColumnDefault string `gorm:"column:COLUMN_DEFAULT"`
+			IsNullable    string `gorm:"column:IS_NULLABLE"`
+			ColumnKey     string `gorm:"column:COLUMN_KEY"`
+			ColumnComment string `gorm:"column:COLUMN_COMMENT"`
+		}
+		if err := tmp.Raw(QueryColumnSQL).Scan(&columns).Error; err != nil {
+			response.Fail(c, nil, "数据库错误!")
+			return
+		}
+		if err := tmp.Close(); err != nil {
+			response.Fail(c, nil, "数据库错误!")
+			return
+		}
+		type returnColumn struct {
+			ColumnName    string `json:"name"`
+			DataType      string `json:"data_type"`
+			ColumnDefault string `json:"default"`
+			IsNullable    string `json:"is_nullable"`
+			ColumnKey     string `json:"key"`
+			ColumnComment string `json:"comment"`
+		}
+		var returnColumns []returnColumn
+		for _, column := range columns {
+			returnColumns = append(returnColumns, returnColumn{column.ColumnName, column.DataType,
+				column.ColumnDefault, column.IsNullable,
+				column.ColumnKey, column.ColumnComment,
+			})
+		}
+		response.Success(c, gin.H{"name": projectTable.PT_name, "description": projectTable.PT_description,
+			"remote_hostname": projectTable.PT_remote_hostname, "remote_username": projectTable.PT_remote_username,
+			"remote_password": projectTable.PT_remote_password, "remote_port": projectTable.PT_remote_port,
+			"columns": returnColumns}, "")
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
+	}
+}
+
+func GetAllProjectTable(c *gin.Context) {
+	type table struct {
+		Uid uint `json:"uid"`
+	}
+	var t table
+
+	if e := c.ShouldBindJSON(&t); e == nil {
+		// 查询特定项目表
+		var projectTables []models.ProjectTable
+		if e := mysql.DB.Where("PU_uid = ?", t.Uid).Find(&projectTables).Error; e != nil {
+			response.Fail(c, nil, "不存在项目表!")
+			return
+		}
+		type returnTable struct {
+			RemoteDbName    string `json:"remote_db_name"`
+			RemoteTableName string `json:"remote_table_name"`
+		}
+		var returnTables []returnTable
+		for _, table1 := range projectTables {
+			returnTables = append(returnTables, returnTable{
+				table1.PT_remote_db_name,
+				table1.PT_remote_table_name})
+		}
+		response.Success(c, gin.H{"tables": returnTables}, "")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
 	}

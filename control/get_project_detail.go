@@ -20,18 +20,9 @@ func GetProjectDetail(c *gin.Context) {
 			Email string `json:"email"`
 			Job   string `json:"job"`
 		}
-		type column struct {
-			ColumnName   string `json:"columnName"`
-			ColumnType   string `json:"columnType"`
-			IsPrimaryKey bool   `json:"isPrimaryKey"`
-			IsForeignKey bool   `json:"isForeignKey"`
-			IsNotNull    bool   `json:"isNotNull"`
-			Desc         string `json:"desc"`
-		}
 		type table struct {
-			TableName string   `json:"tableName"`
-			TableDesc string   `json:"tableDesc"`
-			Columns   []column `json:"columns"`
+			RemoteDbName    string `json:"remote_db_name"`
+			RemoteTableName string `json:"remote_table_name"`
 		}
 		type projectDetail struct {
 			Logo        string   `json:"logo"`
@@ -65,26 +56,18 @@ func GetProjectDetail(c *gin.Context) {
 		}
 		pd.Members = ms
 		//查找ProjectTable表
-		var ptRecords []models.ProjectTable
-		if e := mysql.DB.Where("PU_uid = ?", result.PU_uid).Find(&ptRecords).Error; e != nil {
-			response.Fail(c, nil, "查找项目数据表时出错")
+		var projectTables []models.ProjectTable
+		if e := mysql.DB.Where("PU_uid = ?", result.PU_uid).Find(&projectTables).Error; e != nil {
+			response.Fail(c, nil, "不存在项目表!")
 			return
 		}
-		var ts []table
-		for _, ptRecord := range ptRecords {
-			//查找ProjectColumn表
-			var pcRecords []models.ProjectColumn
-			if e := mysql.DB.Where("PT_uid = ?", ptRecord.PT_uid).Find(&pcRecords).Error; e != nil {
-				response.Fail(c, nil, "查找项目数据列时出错")
-				return
-			}
-			var cs []column
-			for _, pcRecord := range pcRecords {
-				cs = append(cs, column{ColumnName: pcRecord.PC_name, ColumnType: "暂无", IsNotNull: true, IsPrimaryKey: false, IsForeignKey: false, Desc: pcRecord.PC_description})
-			}
-			ts = append(ts, table{TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs})
+		var returnTables []table
+		for _, table1 := range projectTables {
+			returnTables = append(returnTables, table{
+				table1.PT_remote_db_name,
+				table1.PT_remote_table_name})
 		}
-		pd.Tables = ts
+		pd.Tables = returnTables
 		response.Success(c, gin.H{"projectDetail": pd}, "")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
