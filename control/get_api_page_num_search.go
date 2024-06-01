@@ -1,6 +1,7 @@
 package control
 
 import (
+	"backend/models"
 	"backend/mysql"
 	"backend/response"
 
@@ -8,6 +9,22 @@ import (
 )
 
 func GetApiPageNumSearch(c *gin.Context) {
+	//从上下文获取用户信息
+	var identity string
+	var userId uint
+	if data, ok := c.Get("identity"); !ok {
+		response.Fail(c, nil, "没有从token解析出所需信息")
+		return
+	} else {
+		identity = data.(string)
+	}
+	if data, ok := c.Get("userId"); !ok {
+		response.Fail(c, nil, "没有从token解析出所需信息")
+		return
+	} else {
+		userId = data.(uint)
+	}
+	//解析请求参数
 	type msg struct {
 		Limit  uint   `json:"limit"`
 		Search string `json:"search"`
@@ -22,31 +39,50 @@ func GetApiPageNumSearch(c *gin.Context) {
 	if m.Limit == 0 {
 		m.Limit = 15
 	}
-	var aType uint
+	search := "%" + m.Search + "%"
+	//搜索api记录数量
+	var count int64
 	switch m.Type {
 	case "Midtable":
-		aType = 1
+		if e := mysql.DB.Model(&models.Api{}).Where("A_name like ? AND A_type = ?", search, 1).Count(&count).Error; e != nil {
+			response.Fail(c, nil, "查找Api时出错")
+			return
+		}
+	case "Require":
+		if e := mysql.DB.Model(&models.Api{}).Where("A_name like ? AND A_type = ?", search, 2).Count(&count).Error; e != nil {
+			response.Fail(c, nil, "查找Api时出错")
+			return
+		}
 	case "User":
-		aType = 2
+		//其他用户提供的api
+		if identity == "Admin" { //管理员查找时，User包括所有用户提供的api
+			if e := mysql.DB.Model(&models.Api{}).Where("A_name like ? AND A_type = ?", search, 3, userId).Count(&count).Error; e != nil {
+				response.Fail(c, nil, "查找Api时出错")
+				return
+			}
+		} else { //项目用户查找时，User只包括其他用户提供的api
+			if e := mysql.DB.Model(&models.Api{}).Where("A_name like ? AND A_type = ? AND PU_uid != ?", search, 3, userId).Count(&count).Error; e != nil {
+				response.Fail(c, nil, "查找Api时出错")
+				return
+			}
+		}
+	case "Me":
+		//只有项目用户发送这类请求，查找自己提供的api
+		if e := mysql.DB.Model(&models.Api{}).Where("A_name like ? AND A_type = ? AND PU_uid = ?", search, 3, userId).Count(&count).Error; e != nil {
+			response.Fail(c, nil, "查找Api时出错")
+			return
+		}
 	case "":
-		aType = 0
+		//没有指定类型，查找所有api
+		if e := mysql.DB.Model(&models.Api{}).Where("A_name like", search).Count(&count).Error; e != nil {
+			response.Fail(c, nil, "查找Api时出错")
+			return
+		}
 	default:
-		response.Fail(c, nil, "api类型未知")
+		response.Fail(c, nil, "请求的api类型未知")
 		return
 	}
-	search := "%" + m.Search + "%"
-	var count int64
-	if aType > 0 {
-		if e := mysql.DB.Order("updated_at DESC").Limit(m.Limit).Where("A_name like ? AND A_type = ?", search, aType).Count(&count).Error; e != nil {
-			response.Fail(c, nil, "查找Api数量时出错")
-			return
-		}
-	} else {
-		if e := mysql.DB.Order("updated_at DESC").Limit(m.Limit).Where("A_name like ?", search).Count(&count).Error; e != nil {
-			response.Fail(c, nil, "查找Api数量时出错")
-			return
-		}
-	}
+	//生成响应报文
 	pages := count / int64(m.Limit)
 	if count%int64(m.Limit) != 0 {
 		pages++

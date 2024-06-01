@@ -5,12 +5,13 @@ import (
 	"backend/mysql"
 	"backend/response"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"log"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 func getAllProjectTable() (configList []*models.ProjectTable, err error) {

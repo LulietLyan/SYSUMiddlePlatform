@@ -56,7 +56,6 @@ func GetMessagePageNumSearch(c *gin.Context) {
 			response.Fail(c, nil, "Identity参数为未知值")
 			return
 		}
-		print(count)
 		pages := count / int64(m.Limit)
 		if count%int64(m.Limit) != 0 {
 			pages++

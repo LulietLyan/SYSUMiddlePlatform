@@ -14,6 +14,7 @@ type Api struct {
 	A_description string     `gorm:"column:A_description;type:VARCHAR(2048)" json:"A_description"`
 	A_type        uint       `gorm:"column:A_type" json:"A_type"`
 	A_name        string     `gorm:"column:A_name;type:VARCHAR(64)" json:"A_name"`
+	PU_uid        uint       `gorm:"column:PU_uid" json:"PU_uid"`
 }
 
 func (Api) TableName() string {
