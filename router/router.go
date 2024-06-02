@@ -51,6 +51,7 @@ func RouterInit(r *gin.RouterGroup) {
 			project.POST("/newprojecttable", control.NewProjectTable)
 			project.GET("/getprojecttable", control.GetProjectTable)
 			project.GET("/getallprojecttable", control.GetAllProjectTable)
+			project.DELETE("/deleteprojecttable", control.DeleteProjectTable)
 		}
 		api.GET("/projectDetail", control.GetProjectDetail)
 		apiinfo := api.Group("/apiinfo")

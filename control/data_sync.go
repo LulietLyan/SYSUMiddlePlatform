@@ -5,14 +5,17 @@ import (
 	"backend/mysql"
 	"backend/response"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"sync"
 )
+
+var processMap sync.Map
 
 func getAllProjectTable() (configList []*models.ProjectTable, err error) {
 	if e := mysql.DB.Find(&configList).Error; e != nil {
@@ -129,6 +132,9 @@ func InitDataSync() error {
 			log.Fatal(err)
 			return err
 		}
+		// 保存Process以便后续控制
+		process := cmd.Process
+		processMap.Store(todoList[index].PT_uid, process)
 	}
 	return nil
 }
@@ -171,7 +177,40 @@ func NewProjectTable(c *gin.Context) {
 			response.Fail(c, nil, "提交事务时出错")
 			return
 		}
+
 		response.Success(c, gin.H{}, "")
+	} else { //JSON解析失败
+		response.Fail(c, nil, "数据格式错误!")
+	}
+}
+
+func DeleteProjectTable(c *gin.Context) {
+	type msg struct {
+		Id uint `json:"id"`
+	}
+
+	var m msg
+	if e := c.ShouldBindJSON(&m); e == nil {
+		if result := mysql.DB.Delete(&models.ProjectTable{}, m.Id); result.Error != nil {
+			response.Fail(c, nil, "删除ProjectTable时出错")
+			return
+		} else {
+			if result.RowsAffected == 0 {
+				response.Success(c, nil, "要删除的记录不存在")
+				return
+			}
+		}
+		if process, ok := processMap.Load(m.Id); ok {
+			// 确保加载的值是*os.Process类型
+			if proc, ok := process.(*os.Process); ok {
+				// 终止进程
+				if err := proc.Kill(); err == nil {
+					response.Success(c, nil, "Success to kill process")
+					return
+				}
+			}
+		}
+		response.Success(c, nil, "Failed to kill process")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
 	}
