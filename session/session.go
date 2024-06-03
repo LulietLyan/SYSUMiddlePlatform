@@ -1,8 +1,8 @@
 package session
 
 import (
-	"gosqltree/types"
-	"gosqltree/utils"
+	"backend/types"
+	"backend/utils"
 
 	"github.com/pingcap/parser/ast"
 )

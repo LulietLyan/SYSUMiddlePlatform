@@ -1,7 +1,7 @@
 package types
 
 import (
-	"gosqltree/utils"
+	"backend/utils"
 
 	"github.com/pingcap/parser/ast"
 )
