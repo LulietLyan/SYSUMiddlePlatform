@@ -7,16 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 用户路由组
-//
-//	func UserRouterInit(r *gin.RouterGroup) {
-//		userManager := r.Group("/user")
-//		{
-//			// 其它的 api 删完了，只放一个示例
-//			userManager.POST("/register", control.RegisterHandler)
-//			userManager.Use(logic.AuthMiddleware())
-//		}
-//	}
 func RouterInit(r *gin.RouterGroup) {
 
 	r.Static("/logo", "./image")

@@ -62,17 +62,17 @@ func Execute() error {
 
 		// mysql.DB.AutoMigrate(&models.User{}, &models.PresetBackground{}) // 将数据库的表自动映射为User
 
-		_, err := mysql.Init( //建立连接
+		if _, err := mysql.Init( //建立连接
 			viper.GetString("db.hostname"), // 用viper将对应的参数取出来
 			viper.GetInt("db.port"),
 			viper.GetString("db.username"),
 			viper.GetString("db.password"),
 			viper.GetString("db.dbname"),
-		)
-		if err != nil {
+		); err != nil {
 			return err
 		}
-		if err = control.InitDataSync(); err != nil {
+
+		if err := control.InitDataSync(); err != nil {
 			return err
 		}
 
@@ -98,8 +98,8 @@ func Execute() error {
 		// defer mysql.SshDatabaseClient.Close()
 
 		r := router.SetupRouter() // 初始化路由
-		err = r.Run(":2020")
-		if err != nil {
+
+		if err := r.Run(":2020"); err != nil {
 			return err
 		}
 
