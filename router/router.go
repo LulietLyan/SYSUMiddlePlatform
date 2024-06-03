@@ -65,6 +65,10 @@ func RouterInit(r *gin.RouterGroup) {
 			admin.GET("/users", control.GetAllUser)
 			admin.POST("/publish", control.SaveNotification)
 			admin.DELETE("/apiinfo", control.DeleteApi)
+			admin.GET("/users/details", control.GetAllUserDetail)
+			admin.POST("/invitecode", control.GenInviteCode)
+			admin.GET("/tables", control.GetTable)
+			admin.POST("/auth", control.UpdatePermission)
 		}
 	}
 }

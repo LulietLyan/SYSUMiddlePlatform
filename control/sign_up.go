@@ -51,8 +51,15 @@ func SignUp(c *gin.Context) {
 			tx.Rollback()
 			response.Fail(c, nil, "两次输入的密码不一致")
 		}
+		//检查没有重名的用户
+		var userRecord models.User
+		if e := tx.Where("U_username=?", m.UserName).First(&acRecord).Error; e == nil {
+			tx.Rollback()
+			response.Fail(c, nil, "用户名已存在")
+			return
+		}
 		//向user表添加记录
-		userRecord := models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType}
+		userRecord = models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType}
 		if e := tx.Create(&userRecord).Error; e != nil {
 			tx.Rollback()
 			response.Fail(c, nil, "插入新用户信息时出错")
