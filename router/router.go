@@ -69,6 +69,7 @@ func RouterInit(r *gin.RouterGroup) {
 			admin.POST("/invitecode", control.GenInviteCode)
 			admin.GET("/tables", control.GetTable)
 			admin.POST("/auth", control.UpdatePermission)
+			admin.POST("/auth/search", control.GetPermission)
 		}
 	}
 }
