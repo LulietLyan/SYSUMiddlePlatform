@@ -87,6 +87,7 @@ func InitDataSync() error {
 			log.Fatalf("failed to connect database: %v", err)
 			return err
 		}
+
 		QueryCreateTableSQL := fmt.Sprintf("SHOW CREATE TABLE %s", todoList[index].PT_remote_table_name)
 		var createSQLResult []struct {
 			TableName   string `gorm:"column:Table"`
@@ -371,6 +372,13 @@ func DeleteProjectTable(c *gin.Context) {
 					}
 				}
 				processMap.Delete(m.Id)
+			}
+			// 删除表
+			dropTableSQL := fmt.Sprintf("DROP TABLE IF EXISTS %d_%s_%s;",
+				projectTable1.PU_uid, projectTable1.PT_remote_db_name, projectTable1.PT_remote_table_name)
+			if err := mysql.DB_flink.Exec(dropTableSQL).Error; err != nil {
+				response.Fail(c, nil, "Failed to kill process")
+				return
 			}
 			// 运行java命令
 			cmd := exec.Command("java",
