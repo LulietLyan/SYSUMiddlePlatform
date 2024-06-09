@@ -58,6 +58,19 @@ func getTargetConfig(config *models.ProjectTable, str1 string) (str string) {
 	return str
 }
 
+func getEsConfig(config *models.ProjectTable, str1 string) (str string) {
+	str = fmt.Sprintf("CREATE TABLE flink_%s.flink_target_%s "+
+		"%s"+ //主键必须标明NOT ENFORCED
+		" WITH (\n"+
+		"  'connector'  = 'elasticsearch-7',\n"+
+		"  'hosts'     = 'http://47.120.73.205:9200',\n"+
+		"  'index'        = '%d_%s_%s_index'\n"+
+		")",
+		config.PT_remote_db_name, config.PT_remote_table_name, str1,
+		config.PU_uid, config.PT_remote_db_name, config.PT_remote_table_name)
+	return str
+}
+
 func InitDataSync() error {
 	todoList, err := getAllProjectTable()
 	if err != nil {
@@ -119,9 +132,9 @@ func InitDataSync() error {
 		strInsert := fmt.Sprintf("INSERT INTO flink_%s.flink_target_%s select * from flink_%s.flink_source_%s\n",
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name,
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name)
-		// 运行java命令
+		// 运行java命令——同步到mysql
 		cmd := exec.Command("java",
-			"-cp", "flinkdemo.jar;flink_libs/*",
+			"-cp", "mysql2mysql.jar;flink_libs/*",
 			"com.demo.flink.FlinkCdcMySql",
 			strCreatDatabase,
 			strSource,
@@ -132,9 +145,23 @@ func InitDataSync() error {
 			log.Fatal(err)
 			return err
 		}
+		// 运行java命令——同步到es
+		cmd1 := exec.Command("java",
+			"-cp", "mysql2es.jar;flink_libs/*",
+			"com.demo.flink.FlinkCdcMySql",
+			strCreatDatabase,
+			strSource,
+			getEsConfig(todoList[index], configStr1),
+			strInsert,
+		)
+		if err = cmd1.Start(); err != nil {
+			log.Fatal(err)
+			return err
+		}
 		// 保存Process以便后续控制
 		process := cmd.Process
-		processMap.Store(todoList[index].PT_uid, process)
+		process1 := cmd1.Process
+		processMap.Store(todoList[index].PT_uid, [2]*os.Process{process, process1})
 	}
 	return nil
 }
@@ -266,7 +293,7 @@ func NewProjectTable(c *gin.Context) {
 			t.RemoteDbName, t.RemoteTableName, t.RemoteDbName, t.RemoteTableName)
 		// 运行java命令
 		cmd := exec.Command("java",
-			"-cp", "flinkdemo.jar;flink_libs/*",
+			"-cp", "mysql2mysql.jar;flink_libs/*",
 			"com.demo.flink.FlinkCdcMySql",
 			strCreatDatabase,
 			strSource,
@@ -277,9 +304,32 @@ func NewProjectTable(c *gin.Context) {
 			response.Fail(c, nil, "failed to start")
 			return
 		}
+		strEs := fmt.Sprintf("CREATE TABLE flink_%s.flink_target_%s "+
+			"%s"+ //主键必须标明NOT ENFORCED
+			" WITH (\n"+
+			"  'connector'  = 'elasticsearch-7',\n"+
+			"  'hosts'     = 'http://47.120.73.205:9200',\n"+
+			"  'index'        = '%d_%s_%s_index'\n"+
+			")",
+			projectTable2.PT_remote_db_name, projectTable2.PT_remote_table_name, configStr1,
+			projectTable2.PU_uid, projectTable2.PT_remote_db_name, projectTable2.PT_remote_table_name)
+		// 运行java命令
+		cmd1 := exec.Command("java",
+			"-cp", "mysql2es.jar;flink_libs/*",
+			"com.demo.flink.FlinkCdcMySql",
+			strCreatDatabase,
+			strSource,
+			strEs,
+			strInsert,
+		)
+		if err = cmd1.Start(); err != nil {
+			response.Fail(c, nil, "failed to start")
+			return
+		}
 		// 保存Process以便后续控制
 		process := cmd.Process
-		processMap.Store(projectTable2.PT_uid, process)
+		process1 := cmd1.Process
+		processMap.Store(projectTable2.PT_uid, [2]*os.Process{process, process1})
 
 		response.Success(c, gin.H{"id": projectTable2.PT_uid}, "")
 	} else { //JSON解析失败
@@ -303,18 +353,22 @@ func DeleteProjectTable(c *gin.Context) {
 				return
 			}
 		}
-		if process, ok := processMap.Load(m.Id); ok {
-			// 确保加载的值是*os.Process类型
-			if proc, ok := process.(*os.Process); ok {
-				// 终止进程
-				if err := proc.Kill(); err == nil {
-					processMap.Delete(m.Id)
-					response.Success(c, nil, "Success to kill process")
-					return
+		type ProcessList []*os.Process
+		if processesInterface, ok := processMap.Load(m.Id); ok {
+			// 确保加载的值是ProcessList类型
+			if processes, ok := processesInterface.(ProcessList); ok {
+				// 遍历数组，终止每个进程
+				for _, proc := range processes {
+					if err := proc.Kill(); err != nil {
+						response.Fail(c, nil, "Failed to kill process")
+					}
 				}
+				processMap.Delete(m.Id)
+				response.Success(c, nil, "Success to kill process")
+				return
 			}
 		}
-		response.Success(c, nil, "Failed to kill process")
+		response.Fail(c, nil, "Failed to kill process")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
 	}
