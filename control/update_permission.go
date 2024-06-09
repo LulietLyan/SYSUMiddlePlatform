@@ -32,8 +32,15 @@ func UpdatePermission(c *gin.Context) {
 		response.Fail(c, nil, "数据格式错误!")
 		return
 	}
+	//查找PU_uid
+	var puRecord models.ProjectUser
+	if e := mysql.DB.Where("U_uid = ?", m.ProjectId).First(&puRecord).Error; e != nil {
+		response.Fail(c, nil, "找不到项目!")
+		return
+	}
+
 	var pRecord models.Permission
-	e := mysql.DB.Where("PU_uid = ? AND PT_uid = ?", m.ProjectId, m.TableId).First(&pRecord).Error
+	e := mysql.DB.Where("PU_uid = ? AND PT_uid = ?", puRecord.PU_uid, m.TableId).First(&pRecord).Error
 	switch m.Level {
 	case "Null":
 		if e != nil {
@@ -41,18 +48,18 @@ func UpdatePermission(c *gin.Context) {
 			return
 		}
 		if result := mysql.DB.Delete(&models.Permission{}, pRecord.P_uid); result.Error != nil {
-			response.Fail(c, nil, "删除Api时出错")
+			response.Fail(c, nil, "删除权限时出错")
 			return
 		} else {
 			if result.RowsAffected == 0 {
-				response.Success(c, nil, "要删除的记录不存在")
+				response.Success(c, nil, "要删除的权限不存在")
 			} else {
 				response.Success(c, nil, "")
 			}
 		}
 	case "Read":
-		pRecord.PU_uid = m.ProjectId
-		pRecord.PT_uid = m.ProjectId
+		pRecord.PU_uid = puRecord.PU_uid
+		pRecord.PT_uid = m.TableId
 		pRecord.P_level = 1
 		if e := mysql.DB.Save(&pRecord).Error; e != nil {
 			response.Fail(c, nil, "保存权限时出错")
@@ -60,8 +67,8 @@ func UpdatePermission(c *gin.Context) {
 		}
 		response.Success(c, nil, "")
 	case "ReadWrite":
-		pRecord.PU_uid = m.ProjectId
-		pRecord.PT_uid = m.ProjectId
+		pRecord.PU_uid = puRecord.PU_uid
+		pRecord.PT_uid = m.TableId
 		pRecord.P_level = 2
 		if e := mysql.DB.Save(&pRecord).Error; e != nil {
 			response.Fail(c, nil, "保存权限时出错")

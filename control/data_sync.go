@@ -5,14 +5,15 @@ import (
 	"backend/mysql"
 	"backend/response"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 var processMap sync.Map
@@ -181,6 +182,14 @@ func NewProjectTable(c *gin.Context) {
 	var t table
 
 	if e := c.ShouldBindJSON(&t); e == nil {
+		var pu_uid uint
+		if data, ok := c.Get("pu_uid"); !ok {
+			response.Fail(c, nil, "没有从token解析出所需信息")
+			return
+		} else {
+			pu_uid = data.(uint)
+		}
+		t.Uid = pu_uid
 		// 判断是否已存在
 		var projectTable1 models.ProjectTable
 		if e := mysql.DB.Where("PU_uid = ? and PT_remote_db_name = ? and PT_remote_table_name = ?",
@@ -216,7 +225,7 @@ func NewProjectTable(c *gin.Context) {
 			fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 				t.RemoteUsername, t.RemotePassword, t.RemoteHostname, t.RemotePort, t.RemoteDbName))
 		if err != nil {
-			response.Fail(c, nil, "数据同步出错")
+			response.Fail(c, nil, "数据同步出错1")
 			return
 		}
 		QueryCreateTableSQL := fmt.Sprintf("SHOW CREATE TABLE %s", t.RemoteTableName)
@@ -225,7 +234,7 @@ func NewProjectTable(c *gin.Context) {
 			CreateTable string `gorm:"column:Create Table"`
 		}
 		if err := tmp.Raw(QueryCreateTableSQL).Scan(&createSQLResult).Error; err != nil {
-			response.Fail(c, nil, "数据同步出错")
+			response.Fail(c, nil, "数据同步出错2")
 			return
 		}
 		leftIndex := strings.Index(createSQLResult[0].CreateTable, "(")
@@ -242,23 +251,23 @@ func NewProjectTable(c *gin.Context) {
 
 		var projectTable2 models.ProjectTable
 		if e := mysql.DB.Where("PU_uid = ? and PT_remote_db_name = ? and PT_remote_table_name = ?",
-			t.Uid, t.RemoteDbName, t.RemoteTableName).First(&projectTable2).Error; e == nil {
-			response.Fail(c, nil, "数据同步出错")
+			t.Uid, t.RemoteDbName, t.RemoteTableName).First(&projectTable2).Error; e != nil {
+			response.Fail(c, nil, "数据同步出错3")
 			return
 		}
 		if err := tmp.Close(); err != nil {
-			response.Fail(c, nil, "数据同步出错")
+			response.Fail(c, nil, "数据同步出错4")
 			return
 		}
 		// 数据同步——创建数据表结构
 		dropTableSQL := fmt.Sprintf("DROP TABLE IF EXISTS %d_%s_%s;", t.Uid, t.RemoteDbName, t.RemoteTableName)
 		if err := mysql.DB_flink.Exec(dropTableSQL).Error; err != nil {
-			response.Fail(c, nil, "数据同步出错")
+			response.Fail(c, nil, "数据同步出错5")
 			return
 		}
 		createTableSQL := fmt.Sprintf("CREATE TABLE %d_%s_%s %s;", t.Uid, t.RemoteDbName, t.RemoteTableName, configStr)
 		if err := mysql.DB_flink.Exec(createTableSQL).Error; err != nil {
-			response.Fail(c, nil, "数据同步出错")
+			response.Fail(c, nil, "数据同步出错6")
 			return
 		}
 		// 数据同步——java程序执行
@@ -366,7 +375,7 @@ func DeleteProjectTable(c *gin.Context) {
 				// 遍历数组，终止每个进程
 				for _, proc := range processes {
 					if err := proc.Kill(); err != nil {
-						response.Fail(c, nil, "Failed to kill process")
+						response.Fail(c, nil, "Failed to kill process1")
 						return
 					}
 				}
@@ -384,7 +393,7 @@ func DeleteProjectTable(c *gin.Context) {
 				return
 			}
 		}
-		response.Fail(c, nil, "Failed to kill process")
+		response.Fail(c, nil, "Failed to kill process2")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
 	}

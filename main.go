@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/config"
-	"backend/control"
 	"backend/mysql"
 	"backend/router"
 	"log"
@@ -72,9 +71,9 @@ func Execute() error {
 			return err
 		}
 
-		if err := control.InitDataSync(); err != nil {
-			return err
-		}
+		// if err := control.InitDataSync(); err != nil {
+		// 	return err
+		// }
 
 		// // 测试插入
 		// if e := mysql.DB.Create(&models.Admin{

@@ -43,7 +43,7 @@ func RouterInit(r *gin.RouterGroup) {
 			project.GET("/getallprojecttable", control.GetAllProjectTable)
 			project.DELETE("/deleteprojecttable", control.DeleteProjectTable)
 		}
-		api.GET("/projectDetail", control.GetProjectDetail)
+		api.POST("/projectdetail", control.GetProjectDetail)
 		apiinfo := api.Group("/apiinfo")
 		{
 			apiinfo.GET("", control.GetApiBrief)
@@ -70,6 +70,12 @@ func RouterInit(r *gin.RouterGroup) {
 			admin.GET("/tables", control.GetTable)
 			admin.POST("/auth", control.UpdatePermission)
 			admin.POST("/auth/search", control.GetPermission)
+			admin.GET("/requests/pages", control.GetPermissionRequestNum)
+			admin.GET("/requests", control.GetPermissionRequest)
+			admin.POST("/requests/search/pages", control.GetPermissionRequestNumSearch)
+			admin.POST("/requests/search", control.GetPermissionRequestSearch)
+			admin.POST("/requests/reject", control.RejectPermissionRequest)
+			admin.POST("/requests/approve", control.ApprovePermissionRequest)
 		}
 	}
 }

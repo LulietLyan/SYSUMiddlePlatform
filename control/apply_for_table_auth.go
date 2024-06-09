@@ -10,12 +10,12 @@ import (
 
 func ApplyForTableAuth(c *gin.Context) {
 	//获取token中的申请用户uid
-	var userId uint
-	if data, ok := c.Get("userId"); !ok {
+	var pu_uid uint
+	if data, ok := c.Get("pu_uid"); !ok {
 		response.Fail(c, nil, "没有从token解析出所需信息")
 		return
 	} else {
-		userId = data.(uint)
+		pu_uid = data.(uint)
 	}
 	//解析请求参数
 	type msg struct {
@@ -58,14 +58,14 @@ func ApplyForTableAuth(c *gin.Context) {
 		return
 	}
 	if prLevel > 0 {
-		pr := models.PermissionRequest{PU_uid: userId, PT_uid: result.PT_uid, PR_level: prLevel, PR_status: 1}
+		pr := models.PermissionRequest{PU_uid: pu_uid, PT_uid: result.PT_uid, PR_level: prLevel, PR_status: 1}
 		if e := tx.Create(&pr).Error; e != nil {
 			tx.Rollback()
 			response.Fail(c, nil, "插入请求信息时出错")
 			return
 		}
 	} else {
-		err = tx.Where("PU_uid = ? AND PT_uid = ?", userId, result.PT_uid).Delete(&models.Permission{}).Error
+		err = tx.Where("PU_uid = ? AND PT_uid = ?", pu_uid, result.PT_uid).Delete(&models.Permission{}).Error
 		if err != nil {
 			tx.Rollback()
 			response.Fail(c, nil, "删除权限时出错")

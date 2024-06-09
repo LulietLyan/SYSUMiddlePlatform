@@ -11,18 +11,18 @@ import (
 func UpdateProjectMember(c *gin.Context) {
 	//从上下文获取用户信息
 	var identity string
-	var userId uint
+	var pu_uid uint
 	if data, ok := c.Get("identity"); !ok {
 		response.Fail(c, nil, "没有从token解析出所需信息")
 		return
 	} else {
 		identity = data.(string)
 	}
-	if data, ok := c.Get("userId"); !ok {
+	if data, ok := c.Get("pu_uid"); !ok {
 		response.Fail(c, nil, "没有从token解析出所需信息")
 		return
 	} else {
-		userId = data.(uint)
+		pu_uid = data.(uint)
 	}
 	if identity != "Developer" {
 		response.Fail(c, nil, "只有开发用户可以使用此api!")
@@ -42,7 +42,7 @@ func UpdateProjectMember(c *gin.Context) {
 		return
 	}
 	if m.Id < 0 {
-		pmRecord := models.ProjectMember{PM_name: m.Name, PM_phone: m.Phone, PM_email: m.Email, PM_position: m.Job, PU_uid: userId}
+		pmRecord := models.ProjectMember{PM_name: m.Name, PM_phone: m.Phone, PM_email: m.Email, PM_position: m.Job, PU_uid: pu_uid}
 		if e := mysql.DB.Create(&pmRecord).Error; e != nil {
 			response.Fail(c, nil, "插入新成员信息时出错")
 			return
@@ -50,7 +50,7 @@ func UpdateProjectMember(c *gin.Context) {
 		response.Success(c, nil, "")
 		return
 	} else {
-		pmRecord := models.ProjectMember{PM_uid: uint(m.Id), PM_name: m.Name, PM_phone: m.Phone, PM_email: m.Email, PM_position: m.Job, PU_uid: userId}
+		pmRecord := models.ProjectMember{PM_uid: uint(m.Id), PM_name: m.Name, PM_phone: m.Phone, PM_email: m.Email, PM_position: m.Job, PU_uid: pu_uid}
 		if e := mysql.DB.Save(&pmRecord).Error; e != nil {
 			response.Fail(c, nil, "更新成员信息时出错")
 			return

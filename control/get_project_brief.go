@@ -8,6 +8,29 @@ import (
 )
 
 func GetProjectBrief(c *gin.Context) {
+	var identity string
+	var userId uint
+	if data, ok := c.Get("identity"); !ok {
+		response.Fail(c, nil, "没有从token解析出所需信息")
+		return
+	} else {
+		identity = data.(string)
+	}
+	if data, ok := c.Get("userId"); !ok {
+		response.Fail(c, nil, "没有从token解析出所需信息")
+		return
+	} else {
+		userId = data.(uint)
+	}
+	var level int
+	switch identity {
+	case "Admin":
+		level = 1
+	case "Developer":
+		level = 2
+	default:
+		level = 0
+	}
 	type msg struct {
 		Offset uint `form:"offset"`
 		Limit  uint `form:"limit"`
@@ -25,7 +48,7 @@ func GetProjectBrief(c *gin.Context) {
 	}
 	if e := mysql.DB.Table("User").
 		Select("User.U_username, ProjectUser.PU_logo_url,ProjectUser.PU_description,ProjectUser.PU_uid").
-		Joins("left join ProjectUser on User.U_uid = ProjectUser.U_uid").Offset(m.Offset).Limit(m.Limit).
+		Joins("inner join ProjectUser on User.U_uid = ProjectUser.U_uid AND (1=? OR User.U_uid!=?) ", level, userId).Offset(m.Offset).Limit(m.Limit).
 		Find(&results).Error; e != nil {
 		response.Fail(c, nil, "查找项目时出错")
 		return

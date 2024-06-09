@@ -53,20 +53,20 @@ func SignUp(c *gin.Context) {
 		}
 		//检查没有重名的用户
 		var userRecord models.User
-		if e := tx.Where("U_username=?", m.UserName).First(&acRecord).Error; e == nil {
+		if e := tx.Where("U_username=?", m.UserName).First(&userRecord).Error; e == nil {
 			tx.Rollback()
 			response.Fail(c, nil, "用户名已存在")
 			return
 		}
 		//向user表添加记录
-		userRecord = models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType}
+		userRecord = models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType + 1}
 		if e := tx.Create(&userRecord).Error; e != nil {
 			tx.Rollback()
 			response.Fail(c, nil, "插入新用户信息时出错")
 			return
 		}
 		//如果注册的用户是开发用户或分析用户，向相应表补充额外数据
-		if uType == 2 {
+		if uType == 1 {
 			auRecord := models.AnalyticalUser{
 				U_uid:       userRecord.U_uid,
 				AU_phone:    m.Phone,
@@ -79,7 +79,7 @@ func SignUp(c *gin.Context) {
 				response.Fail(c, nil, "插入分析用户信息时出错")
 				return
 			}
-		} else if uType == 1 {
+		} else if uType == 0 {
 			puRecord := models.ProjectUser{
 				U_uid:    userRecord.U_uid,
 				PU_email: m.Email,

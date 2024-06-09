@@ -96,10 +96,10 @@ type column struct {
 
 func GetProjectDetail(c *gin.Context) {
 	type msg struct {
-		Projectname string `form:"projectname"`
+		Projectname string `json:"projectname"`
 	}
 	var m msg
-	if e := c.ShouldBindQuery(&m); e == nil {
+	if e := c.ShouldBindJSON(&m); e == nil {
 		type member struct {
 			Id    uint   `json:"id"`
 			Name  string `json:"name"`
@@ -131,7 +131,8 @@ func GetProjectDetail(c *gin.Context) {
 			PU_description string `gorm:"column:PU_description;type:VARCHAR(8192)" json:"PU_description"`
 			PU_uid         uint   `gorm:"column:PU_uid" json:"PU_uid"`
 		}
-		if e := mysql.DB.Table("User").Select("ProjectUser.PU_logo_url,User.U_username,ProjectUser.PU_description,ProjectUser.PU_uid").Joins("Join ProjectUser on User.U_uid = ProjectUser.U_uid").First(&result).Error; e != nil {
+		if e := mysql.DB.Table("User").Select("ProjectUser.PU_logo_url,User.U_username,ProjectUser.PU_description,ProjectUser.PU_uid").Joins("Join ProjectUser on User.U_uid = ProjectUser.U_uid and User.U_username = ?", m.Projectname).First(&result).Error; e != nil {
+			print(e)
 			response.Fail(c, nil, "查找项目时出错")
 			return
 		}
@@ -161,7 +162,7 @@ func GetProjectDetail(c *gin.Context) {
 		for _, ptRecord := range ptRecords {
 			// 获取表字段信息
 			cs, msg := queryColumn(ptRecord)
-			ts = append(ts, table{TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs, Message: msg})
+			ts = append(ts, table{Id: ptRecord.PT_uid, TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs, Message: msg})
 		}
 		pd.Tables = ts
 		// pd.Tables = returnTables
