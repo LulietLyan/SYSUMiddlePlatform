@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/control"
 	"backend/mysql"
 	"backend/router"
 	"log"
@@ -60,7 +61,6 @@ func Execute() error {
 		// }
 
 		// mysql.DB.AutoMigrate(&models.User{}, &models.PresetBackground{}) // 将数据库的表自动映射为User
-
 		if _, err := mysql.Init( //建立连接
 			viper.GetString("db.hostname"), // 用viper将对应的参数取出来
 			viper.GetInt("db.port"),
@@ -70,11 +70,9 @@ func Execute() error {
 		); err != nil {
 			return err
 		}
-
-		// if err := control.InitDataSync(); err != nil {
-		// 	return err
-		// }
-
+		if err := control.InitDataSync(); err != nil {
+			return err
+		}
 		// // 测试插入
 		// if e := mysql.DB.Create(&models.Admin{
 		// 	Admin_password: "123456",
@@ -93,7 +91,6 @@ func Execute() error {
 
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()
-		defer mysql.DB_flink.Close()
 		// defer mysql.SshDatabaseClient.Close()
 
 		r := router.SetupRouter() // 初始化路由
