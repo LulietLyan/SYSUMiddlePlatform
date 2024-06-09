@@ -344,6 +344,12 @@ func DeleteProjectTable(c *gin.Context) {
 
 	var m msg
 	if e := c.ShouldBindJSON(&m); e == nil {
+		// 获取表
+		var projectTable1 models.ProjectTable
+		if e := mysql.DB.Where("PT_uid = ?", m.Id).First(&projectTable1).Error; e != nil {
+			response.Fail(c, nil, "该项目表不存在!")
+			return
+		}
 		if result := mysql.DB.Delete(&models.ProjectTable{}, m.Id); result.Error != nil {
 			response.Fail(c, nil, "删除ProjectTable时出错")
 			return
@@ -361,10 +367,20 @@ func DeleteProjectTable(c *gin.Context) {
 				for _, proc := range processes {
 					if err := proc.Kill(); err != nil {
 						response.Fail(c, nil, "Failed to kill process")
+						return
 					}
 				}
 				processMap.Delete(m.Id)
-				response.Success(c, nil, "Success to kill process")
+			}
+			// 运行java命令
+			cmd := exec.Command("java",
+				"-cp", "deleteIndex.jar;flink_libs/*",
+				"com.demo.flink.FlinkCdcMySql",
+				fmt.Sprintf("/%d_%s_%s_index", projectTable1.PU_uid, projectTable1.PT_remote_db_name,
+					projectTable1.PT_remote_table_name),
+			)
+			if err := cmd.Run(); err == nil {
+				response.Success(c, nil, "Success to kill process and delete index")
 				return
 			}
 		}
