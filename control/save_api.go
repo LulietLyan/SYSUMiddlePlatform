@@ -4,6 +4,7 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/response"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,11 +37,12 @@ func SaveApi(c *gin.Context) {
 		Projectname string `json:"projectname"`
 	}
 	var m msg
-	if e := c.ShouldBindQuery(&m); e != nil {
+	if e := c.ShouldBindJSON(&m); e != nil {
 		response.Fail(c, nil, "数据格式错误!")
 		return
 	}
 	var aType uint
+	fmt.Println(m.Type)
 	switch m.Type {
 	case "Midtable":
 		aType = 1
@@ -58,12 +60,19 @@ func SaveApi(c *gin.Context) {
 		//Id小于0表示新建
 		aRecord := models.Api{A_url: m.Url, A_parameter: m.Request, A_respond: m.Response, A_description: m.Desc, A_type: aType, A_name: m.Name}
 		if aType == 3 {
-			aRecord.PU_uid = userId
+			var puRecord models.ProjectUser
+			if e := mysql.DB.Where("U_uid = ?", userId).First(&puRecord).Error; e != nil {
+				response.Fail(c, nil, "查找项目用户时失败")
+				return
+			}
+			aRecord.PU_uid = puRecord.PU_uid
 		}
 		if e := mysql.DB.Create(&aRecord).Error; e != nil {
 			response.Fail(c, nil, "插入新Api信息时出错")
 			return
 		}
+		response.Success(c, nil, "")
+		return
 	} else {
 		//Id大于0表示修改
 		if identity == "Developer" {

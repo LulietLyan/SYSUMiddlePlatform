@@ -29,26 +29,26 @@ func SaveNotification(c *gin.Context) {
 		Content string `json:"content"`
 	}
 	var m msg
-	if e := c.ShouldBindQuery(&m); e != nil {
+	if e := c.ShouldBindJSON(&m); e != nil {
 		response.Fail(c, nil, "数据格式错误!")
 		return
 	}
 	switch m.Type {
-	case "ALLUser":
+	case "AllUser":
 		nRecord := models.Notifications{N_type: 3, N_Title: m.Title, N_Body: m.Content}
 		if e := mysql.DB.Create(&nRecord).Error; e != nil {
 			response.Fail(c, nil, "插入新Api信息时出错")
 			return
 		}
 		response.Success(c, nil, "")
-	case "ALLAnalyzer":
+	case "AllAnalyzer":
 		nRecord := models.Notifications{N_type: 2, N_Title: m.Title, N_Body: m.Content}
 		if e := mysql.DB.Create(&nRecord).Error; e != nil {
 			response.Fail(c, nil, "插入新Api信息时出错")
 			return
 		}
 		response.Success(c, nil, "")
-	case "ALLDeveloper":
+	case "AllDeveloper":
 		nRecord := models.Notifications{N_type: 1, N_Title: m.Title, N_Body: m.Content}
 		if e := mysql.DB.Create(&nRecord).Error; e != nil {
 			response.Fail(c, nil, "插入新Api信息时出错")
@@ -85,5 +85,8 @@ func SaveNotification(c *gin.Context) {
 			}
 			response.Success(c, nil, "")
 		}
+	default:
+		response.Fail(c, nil, "未知的通知类型")
+		return
 	}
 }

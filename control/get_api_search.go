@@ -57,7 +57,7 @@ func GetApiSearch(c *gin.Context) {
 	case "User":
 		//其他用户提供的api
 		if identity == "Admin" { //管理员查找时，User包括所有用户提供的api
-			if e := mysql.DB.Order("updated_at DESC").Offset(m.Offset).Limit(m.Limit).Where("A_name like ? AND A_type = ?", search, 3, userId).Find(&apiRecords).Error; e != nil {
+			if e := mysql.DB.Order("updated_at DESC").Offset(m.Offset).Limit(m.Limit).Where("A_name like ? AND A_type = ?", search, 3).Find(&apiRecords).Error; e != nil {
 				response.Fail(c, nil, "查找Api时出错")
 				return
 			}
@@ -75,7 +75,7 @@ func GetApiSearch(c *gin.Context) {
 		}
 	case "":
 		//没有指定类型，查找所有api
-		if e := mysql.DB.Order("updated_at DESC").Offset(m.Offset).Limit(m.Limit).Where("A_name like", search).Find(&apiRecords).Error; e != nil {
+		if e := mysql.DB.Order("updated_at DESC").Offset(m.Offset).Limit(m.Limit).Where("A_name like ?", search).Find(&apiRecords).Error; e != nil {
 			response.Fail(c, nil, "查找Api时出错")
 			return
 		}

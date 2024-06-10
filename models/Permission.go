@@ -6,11 +6,11 @@ import "time"
 type Permission struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
-	P_uid     uint       `gorm:"column:P_uid;primary_key" json:"P_uid"`
-	PU_uid    uint       `gorm:"column:PU_uid" json:"PU_uid"`
-	PT_uid    uint       `gorm:"column:PT_uid" json:"PT_uid"`
-	P_level   uint       `gorm:"column:P_level" json:"P_level"`
+	// DeletedAt *time.Time `sql:"index"`
+	P_uid   uint `gorm:"column:P_uid;primary_key" json:"P_uid"`
+	PU_uid  uint `gorm:"column:PU_uid" json:"PU_uid"`
+	PT_uid  uint `gorm:"column:PT_uid" json:"PT_uid"`
+	P_level uint `gorm:"column:P_level" json:"P_level"`
 }
 
 func (Permission) TableName() string {

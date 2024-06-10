@@ -55,9 +55,16 @@ func GetApiBrief(c *gin.Context) {
 
 	var apiInfos []apiInfo
 	var apiTypes = [4]string{"Midtable", "Require", "User", "Me"}
+	var puRecord models.ProjectUser
+	if identity == "Developer" {
+		if e := mysql.DB.Where("U_uid = ?", userId).First(&puRecord).Error; e != nil {
+			response.Fail(c, nil, "查找项目用户时失败")
+			return
+		}
+	}
 	for _, apiRecord := range apiRecords {
 		typeindex := apiRecord.A_type - 1 //1 2 3 --> 0 1 2
-		if identity == "Developer" && apiRecord.A_type == 3 && apiRecord.PU_uid == userId {
+		if identity == "Developer" && apiRecord.A_type == 3 && apiRecord.PU_uid == puRecord.PU_uid {
 			typeindex = 3 //标记为自己提供的api
 		}
 		apiInfos = append(apiInfos, apiInfo{Title: apiRecord.A_name, Id: apiRecord.A_uid, Content: apiRecord.A_description, Type: apiTypes[typeindex], Time: apiRecord.CreatedAt.Format("2006-01-02 15:04")})

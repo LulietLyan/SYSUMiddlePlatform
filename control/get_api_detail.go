@@ -26,7 +26,7 @@ func GetApiDetail(c *gin.Context) {
 	}
 	//解析请求参数
 	type msg struct {
-		Id uint `json:"id"`
+		Id uint `form:"id"`
 	}
 
 	var m msg
@@ -53,8 +53,16 @@ func GetApiDetail(c *gin.Context) {
 	}
 	var apiTypes = [4]string{"Midtable", "Require", "User", "Me"}
 	typeindex := apiRecord.A_type - 1 //1 2 3 --> 0 1 2
-	if identity == "Developer" && apiRecord.A_type == 3 && apiRecord.PU_uid == userId {
-		typeindex = 3 //标记为自己提供的api
+
+	if identity == "Developer" && apiRecord.A_type == 3 {
+		var puRecord models.ProjectUser
+		if e := mysql.DB.Where("U_uid = ?", userId).First(&puRecord).Error; e != nil {
+			response.Fail(c, nil, "查找项目用户时失败")
+			return
+		}
+		if apiRecord.PU_uid == puRecord.PU_uid {
+			typeindex = 3 //标记为自己提供的api
+		}
 	}
 	var queryProjectName struct {
 		ProjectName string `gorm:"column:U_username"`

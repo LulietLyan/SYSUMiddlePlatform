@@ -30,10 +30,12 @@ func AuthMiddleware() gin.HandlerFunc {
 		//验证通过后获取claims中的Id
 		userId := claims.UserId
 		identity := claims.Identity
+		pu_uid := claims.PU_uid
 		// var user models.User
 		// mysql.DB.First(&user, userId) //默认用户存在
 		c.Set("userId", userId)
 		c.Set("identity", identity)
+		c.Set("pu_uid", pu_uid)
 		c.Next()
 	}
 }
