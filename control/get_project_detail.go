@@ -95,6 +95,13 @@ type column struct {
 }
 
 func GetProjectDetail(c *gin.Context) {
+	var pu_uid uint
+	if data, ok := c.Get("pu_uid"); !ok {
+		response.Fail(c, nil, "没有从token解析出所需信息")
+		return
+	} else {
+		pu_uid = data.(uint)
+	}
 	type msg struct {
 		Projectname string `json:"projectname"`
 	}
@@ -116,6 +123,8 @@ func GetProjectDetail(c *gin.Context) {
 			Message   string   `json:"msg"`
 			// RemoteDbName    string `json:"remote_db_name"`
 			// RemoteTableName string `json:"remote_table_name"`
+			Auth         string `json:"auth"`
+			RequestState string `json:"request_state"`
 		}
 		type projectDetail struct {
 			Logo        string   `json:"logo"`
@@ -162,7 +171,31 @@ func GetProjectDetail(c *gin.Context) {
 		for _, ptRecord := range ptRecords {
 			// 获取表字段信息
 			cs, msg := queryColumn(ptRecord)
-			ts = append(ts, table{Id: ptRecord.PT_uid, TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs, Message: msg})
+			auth, request_state := "", ""
+			if pu_uid > 0 && pu_uid != result.PU_uid {
+				auth = "无权限"
+				var pRecord models.Permission
+				var prRecord models.PermissionRequest
+				e1 := mysql.DB.Where("PU_uid = ? AND PT_uid = ?", pu_uid, ptRecord.PT_uid).First(&pRecord).Error
+				e2 := mysql.DB.Where("PU_uid = ? AND PT_uid = ? AND PR_status = 1", pu_uid, ptRecord.PT_uid).First(&prRecord).Error
+				if e1 == nil {
+					switch pRecord.P_level {
+					case 1:
+						auth = "只读"
+					case 2:
+						auth = "读写"
+					}
+				}
+				if e2 == nil {
+					switch prRecord.PR_level {
+					case 1:
+						request_state = "正在申请读权限"
+					case 2:
+						request_state = "正在申请读写权限"
+					}
+				}
+			}
+			ts = append(ts, table{Id: ptRecord.PT_uid, TableName: ptRecord.PT_name, TableDesc: ptRecord.PT_description, Columns: cs, Message: msg, Auth: auth, RequestState: request_state})
 		}
 		pd.Tables = ts
 		// pd.Tables = returnTables

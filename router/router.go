@@ -76,6 +76,7 @@ func RouterInit(r *gin.RouterGroup) {
 			admin.POST("/requests/search", control.GetPermissionRequestSearch)
 			admin.POST("/requests/reject", control.RejectPermissionRequest)
 			admin.POST("/requests/approve", control.ApprovePermissionRequest)
+			admin.GET("/sysinfo", control.GetSystemInfo)
 		}
 	}
 }

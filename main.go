@@ -30,6 +30,7 @@ func init() {
 }
 
 func main() {
+	control.InitSysInfo()
 	if err := Execute(); err != nil {
 		log.Println("start fail:", err.Error())
 		os.Exit(-1)
