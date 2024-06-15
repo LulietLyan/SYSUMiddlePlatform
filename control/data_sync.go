@@ -106,8 +106,54 @@ func InitDataSync() error {
 		configStr1 := re.ReplaceAllStringFunc(configStr, func(s string) string {
 			return s + " NOT ENFORCED"
 		})
-		re = regexp.MustCompile(`\s*DEFAULT\s+[^,]*\s*,`)
-		configStr1 = re.ReplaceAllString(configStr1, ",")
+		Index1 := strings.Index(configStr1, "NOT ENFORCED")
+		// 没有主键
+		if Index1 == -1 {
+			Index2 := strings.Index(configStr1, "KEY")
+			if Index2 != -1 {
+				configStr = configStr1[0:Index2-4] + "\n)"
+			}
+
+			lines := strings.Split(configStr, "\n")
+			for i, line := range lines {
+				// 使用Fields函数获取单词列表
+				words := strings.Fields(line)
+				// 只保留前两个词
+				if len(words) >= 2 {
+					lines[i] = "  " + words[0] + " " + words[1]
+					if i < len(lines)-2 {
+						lines[i] = lines[i] + ","
+					}
+				} else if len(words) == 1 {
+					lines[i] = words[0]
+				} else {
+					lines[i] = ""
+				}
+			}
+			configStr1 = strings.Join(lines, "\n")
+		} else {
+			Index2 := strings.Index(configStr1, "NOT ENFORCED")
+			configStr = configStr1[0:Index2] + "\n)"
+			configStr1 = configStr1[0:Index2+12] + "\n)"
+
+			lines := strings.Split(configStr1, "\n")
+			for i, line := range lines {
+				// 使用Fields函数获取单词列表
+				words := strings.Fields(line)
+				// 只保留前两个词
+				if len(words) >= 2 {
+					if i == len(lines)-2 {
+						continue
+					}
+					lines[i] = "  " + words[0] + " " + words[1] + ","
+				} else if len(words) == 1 {
+					lines[i] = words[0]
+				} else {
+					lines[i] = ""
+				}
+			}
+			configStr1 = strings.Join(lines, "\n")
+		}
 		configStr1 = strings.ReplaceAll(configStr1, "datetime", "timestamp")
 
 		if err := tmp.Close(); err != nil {
