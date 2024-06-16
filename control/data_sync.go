@@ -68,7 +68,7 @@ func getEsConfig(config *models.ProjectTable, str1 string) (str string) {
 		"  'index'        = '%d_%s_%s_index'\n"+
 		")",
 		config.PT_remote_db_name, config.PT_remote_table_name, str1,
-		config.PU_uid, config.PT_remote_db_name, config.PT_remote_table_name)
+		config.PU_uid, strings.ToLower(config.PT_remote_db_name), strings.ToLower(config.PT_remote_table_name))
 	return str
 }
 
@@ -120,6 +120,11 @@ func InitDataSync() error {
 				words := strings.Fields(line)
 				// 只保留前两个词
 				if len(words) >= 2 {
+					if len(words[1]) > 4 {
+						if words[1][0:4] == "enum" {
+							words[1] = "varchar(50)"
+						}
+					}
 					lines[i] = "  " + words[0] + " " + words[1]
 					if i < len(lines)-2 {
 						lines[i] = lines[i] + ","
@@ -144,6 +149,11 @@ func InitDataSync() error {
 				if len(words) >= 2 {
 					if i == len(lines)-2 {
 						continue
+					}
+					if len(words[1]) > 4 {
+						if words[1][0:4] == "enum" {
+							words[1] = "varchar(50)"
+						}
 					}
 					lines[i] = "  " + words[0] + " " + words[1] + ","
 				} else if len(words) == 1 {
@@ -180,7 +190,7 @@ func InitDataSync() error {
 		strInsert := fmt.Sprintf("INSERT INTO flink_%s.flink_target_%s select * from flink_%s.flink_source_%s\n",
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name,
 			todoList[index].PT_remote_db_name, todoList[index].PT_remote_table_name)
-		// 运行java命令——同步到mysql
+		//// 运行java命令——同步到mysql
 		cmd := exec.Command("java",
 			"-cp", "mysql2mysql.jar;flink_libs/*",
 			"com.demo.flink.FlinkCdcMySql",
@@ -292,8 +302,64 @@ func NewProjectTable(c *gin.Context) {
 		configStr1 := re.ReplaceAllStringFunc(configStr, func(s string) string {
 			return s + " NOT ENFORCED"
 		})
-		re = regexp.MustCompile(`\s*DEFAULT\s+[^,]*\s*,`)
-		configStr1 = re.ReplaceAllString(configStr1, ",")
+		Index1 := strings.Index(configStr1, "NOT ENFORCED")
+		// 没有主键
+		if Index1 == -1 {
+			Index2 := strings.Index(configStr1, "KEY")
+			if Index2 != -1 {
+				configStr = configStr1[0:Index2-4] + "\n)"
+			}
+
+			lines := strings.Split(configStr, "\n")
+			for i, line := range lines {
+				// 使用Fields函数获取单词列表
+				words := strings.Fields(line)
+				// 只保留前两个词
+				if len(words) >= 2 {
+					if len(words[1]) > 4 {
+						if words[1][0:4] == "enum" {
+							words[1] = "varchar(50)"
+						}
+					}
+					lines[i] = "  " + words[0] + " " + words[1]
+					if i < len(lines)-2 {
+						lines[i] = lines[i] + ","
+					}
+				} else if len(words) == 1 {
+					lines[i] = words[0]
+				} else {
+					lines[i] = ""
+				}
+			}
+			configStr1 = strings.Join(lines, "\n")
+		} else {
+			Index2 := strings.Index(configStr1, "NOT ENFORCED")
+			configStr = configStr1[0:Index2] + "\n)"
+			configStr1 = configStr1[0:Index2+12] + "\n)"
+
+			lines := strings.Split(configStr1, "\n")
+			for i, line := range lines {
+				// 使用Fields函数获取单词列表
+				words := strings.Fields(line)
+				// 只保留前两个词
+				if len(words) >= 2 {
+					if i == len(lines)-2 {
+						continue
+					}
+					if len(words[1]) > 4 {
+						if words[1][0:4] == "enum" {
+							words[1] = "varchar(50)"
+						}
+					}
+					lines[i] = "  " + words[0] + " " + words[1] + ","
+				} else if len(words) == 1 {
+					lines[i] = words[0]
+				} else {
+					lines[i] = ""
+				}
+			}
+			configStr1 = strings.Join(lines, "\n")
+		}
 		configStr1 = strings.ReplaceAll(configStr1, "datetime", "timestamp")
 
 		var projectTable2 models.ProjectTable
@@ -368,7 +434,8 @@ func NewProjectTable(c *gin.Context) {
 			"  'index'        = '%d_%s_%s_index'\n"+
 			")",
 			projectTable2.PT_remote_db_name, projectTable2.PT_remote_table_name, configStr1,
-			projectTable2.PU_uid, projectTable2.PT_remote_db_name, projectTable2.PT_remote_table_name)
+			projectTable2.PU_uid, strings.ToLower(projectTable2.PT_remote_db_name),
+			strings.ToLower(projectTable2.PT_remote_table_name))
 		// 运行java命令
 		cmd1 := exec.Command("java",
 			"-cp", "mysql2es.jar;flink_libs/*",
@@ -439,8 +506,8 @@ func DeleteProjectTable(c *gin.Context) {
 			cmd := exec.Command("java",
 				"-cp", "deleteIndex.jar;flink_libs/*",
 				"com.demo.flink.FlinkCdcMySql",
-				fmt.Sprintf("/%d_%s_%s_index", projectTable1.PU_uid, projectTable1.PT_remote_db_name,
-					projectTable1.PT_remote_table_name),
+				fmt.Sprintf("/%d_%s_%s_index", projectTable1.PU_uid, strings.ToLower(projectTable1.PT_remote_db_name),
+					strings.ToLower(projectTable1.PT_remote_table_name)),
 			)
 			if err := cmd.Run(); err == nil {
 				response.Success(c, nil, "Success to kill process and delete index")
