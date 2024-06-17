@@ -1,0 +1,135 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_STACK_OVERFLOW (0xc00000fd) at pc=0x00007ffe45bfd0e0, pid=672, tid=0x00000000000034f4
+#
+# JRE version: Java(TM) SE Runtime Environment (8.0_411) (build 1.8.0_411-b09)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (25.411-b09 mixed mode windows-amd64 compressed oops)
+# Problematic frame:
+# V  [jvm.dll+0x21d0e0]
+#
+# Failed to write core dump. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000001b41ca72000):  JavaThread "I/O dispatcher 911" [_thread_in_vm, id=13556, stack(0x0000004adf600000,0x0000004adf700000)]
+
+siginfo: ExceptionCode=0xc00000fd, ExceptionInformation=0x0000000000000001 0x0000004adf6fd280 
+
+Registers:
+RAX=0x0000000000000003, RBX=0x0000000000000003, RCX=0x0000004adf6fd280, RDX=0x0000000000002000
+RSP=0x0000004adf6ff280, RBP=0x0000004adf6ff380, RSI=0x0000000000000003, RDI=0x000001b40f80bdf8
+R8 =0x0000000000000005, R9 =0x0000000000000006, R10=0x000001b41cc05480, R11=0x000001b40f80bdf8
+R12=0x000001b41c667cb0, R13=0x0000004adf6ff590, R14=0x0000004adf6ff280, R15=0x0000004adf6ff660
+RIP=0x00007ffe45bfd0e0, EFLAGS=0x0000000000010206
+
+Top of Stack: (sp=0x0000004adf6ff280)
+0x0000004adf6ff280:   000001b41ca72000 0000000000000001
+0x0000004adf6ff290:   000001b40f80bdf8 00007ffe45aac54b
+0x0000004adf6ff2a0:   000001b40f80bdf8 000001b41ca72000
+0x0000004adf6ff2b0:   0000000000000000 0000004adc9177ee
+0x0000004adf6ff2c0:   0000000ac0006a00 000001b40f80bdf8
+0x0000004adf6ff2d0:   000001b41ca72000 00000007c0006a20
+0x0000004adf6ff2e0:   0000000000000001 0000000000000000
+0x0000004adf6ff2f0:   000001b40f80bdf8 0000000000000001
+0x0000004adf6ff300:   0000000000000006 000001b41ca72000
+0x0000004adf6ff310:   000001b40f80bdf8 000001b41ca72000
+0x0000004adf6ff320:   000001b400046ea0 000001b41ca72000
+0x0000004adf6ff330:   000001b41ca72000 000001b40f80bdf8
+0x0000004adf6ff340:   000001b41ca72000 0000000000000006
+0x0000004adf6ff350:   00000007c0006a20 00007ffe45ab2b9b
+0x0000004adf6ff360:   00000007c0006a20 0000004adf6ff3c1
+0x0000004adf6ff370:   000001b40f80bdf8 0000000000000000 
+
+Instructions: (pc=0x00007ffe45bfd0e0)
+0x00007ffe45bfd0c0:   f0 7c 33 48 8b de e8 25 39 09 00 48 63 d0 ff c6
+0x00007ffe45bfd0d0:   48 0f af d3 49 8b ce 48 63 c6 48 2b ca 48 ff c3
+0x00007ffe45bfd0e0:   c7 01 00 00 00 00 48 3b 05 03 c9 59 00 7e d7 48
+0x00007ffe45bfd0f0:   8b 9d e8 00 00 00 48 8d 54 24 48 48 8d 4d 40 e8 
+
+
+Register to memory mapping:
+
+RAX=0x0000000000000003 is an unknown value
+RBX=0x0000000000000003 is an unknown value
+RCX=0x0000004adf6fd280 is pointing into the stack for thread: 0x000001b41ca72000
+RDX=0x0000000000002000 is an unknown value
+RSP=0x0000004adf6ff280 is pointing into the stack for thread: 0x000001b41ca72000
+RBP=0x0000004adf6ff380 is pointing into the stack for thread: 0x000001b41ca72000
+RSI=0x0000000000000003 is an unknown value
+RDI={method} {0x000001b40f80be00} 'run' '()V' in 'java/lang/Thread'
+R8 =0x0000000000000005 is an unknown value
+R9 =0x0000000000000006 is an unknown value
+R10=0x000001b41cc05480 is an unknown value
+R11={method} {0x000001b40f80be00} 'run' '()V' in 'java/lang/Thread'
+R12=0x000001b41c667cb0 is an unknown value
+R13=0x0000004adf6ff590 is pointing into the stack for thread: 0x000001b41ca72000
+R14=0x0000004adf6ff280 is pointing into the stack for thread: 0x000001b41ca72000
+R15=0x0000004adf6ff660 is pointing into the stack for thread: 0x000001b41ca72000
+
+
+Stack: [0x0000004adf600000,0x0000004adf700000],  sp=0x0000004adf6ff280,  free space=1020k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x21d0e0]
+
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x000001b41ca6d800 JavaThread "I/O dispatcher 912" [_thread_new, id=9264, stack(0x0000000000000000,0x0000000000000000)]
+=>0x000001b41ca72000 JavaThread "I/O dispatcher 911" [_thread_in_vm, id=13556, stack(0x0000004adf600000,0x0000004adf700000)]
+  0x000001b41ca70800 JavaThread "I/O dispatcher 910" [_thread_in_native, id=13572, stack(0x0000004adf300000,0x0000004adf400000)]
+  0x000001b41ca64800 JavaThread "I/O dispatcher 909" [_thread_new, id=22088, stack(0x0000000000000000,0x0000000000000000)]
+  0x000001b41ca6a800 JavaThread "I/O dispatcher 908" [_thread_in_native, id=22092, stack(0x0000004adee00000,0x0000004adef00000)]
+  0x000001b41ca66000 JavaThread "I/O dispatcher 907" [_thread_in_native, id=22164, stack(0x0000004adeb00000,0x0000004adec00000)]
+  0x000001b41ca67800 JavaThread "I/O dispatcher 906" [_thread_in_native, id=21672, stack(0x0000004adea00000,0x0000004adeb00000)]
+  0x000001b41ca67000 JavaThread "I/O dispatcher 905" [_thread_new, id=22140, stack(0x0000000000000000,0x0000000000000000)]
+  0x000001b41ca65800 JavaThread "pool-121-thread-1" [_thread_new, id=22144, stack(0x0000000000000000,0x0000000000000000)]
+  0x000001b41ca6a000 JavaThread "pool-120-thread-1" [_thread_in_native, id=22148, stack(0x0000004adcb00000,0x0000004adcc00000)]
+  0x000001b41ca68800 JavaThread "Source: flink_source_Student[1] -> DropUpdateBefore[2] -> ConstraintEnforcer[3] -> Sink: flink_target_Student[3] (2/3)#38" [_thread_blocked, id=21928, stack(0x0000004ae0700000,0x0000004ae0800000)]
+  0x000001b41ca6b800 JavaThread "Source: flink_source_Student[1] -> DropUpdateBefore[2] -> ConstraintEnforcer[3] -> Sink: flink_target_Student[3] (1/3)#37" [_thread_blocked, id=14228, stack(0x0000004adf700000,0x0000004adf800000)]
+  0x000001b41c04d000 JavaThread "CloseableReaperThread" daemon [_thread_blocked, id=15176, stack(0x0000004adcd00000,0x0000004adce00000)]
+  0x000001b41c051800 JavaThread "jobmanager-future-thread-8" daemon [_thread_blocked, id=2180, stack(0x0000004ae0b00000,0x0000004ae0c00000)]
+  0x000001b41c04c800 JavaThread "jobmanager-future-thread-7" daemon [_thread_blocked, id=21200, stack(0x0000004ae0a00000,0x0000004ae0b00000)]
+  0x000001b41c051000 JavaThread "jobmanager-future-thread-6" daemon [_thread_blocked, id=7352, stack(0x0000004ae0900000,0x0000004ae0a00000)]
+  0x000001b41c050000 JavaThread "flink-akka.actor.default-dispatcher-16" [_thread_blocked, id=15140, stack(0x0000004adf100000,0x0000004adf200000)]
+  0x000001b41c043800 JavaThread "jobmanager-future-thread-5" daemon [_thread_blocked, id=20288, stack(0x0000004adec00000,0x0000004aded00000)]
+  0x000001b41c04b800 JavaThread "flink-akka.actor.default-dispatcher-15" [_thread_blocked, id=15712, stack(0x0000004ae1e00000,0x0000004ae1f00000)]
+  0x000001b41c04b000 JavaThread "Flink-DispatcherRestEndpoint-thread-4" daemon [_thread_blocked, id=8360, stack(0x0000004ae0600000,0x0000004ae0700000)]
+  0x000001b41c04a000 JavaThread "jobmanager-future-thread-4" daemon [_thread_blocked, id=11568, stack(0x0000004ae1700000,0x0000004ae1800000)]
+  0x000001b41c045000 JavaThread "jobmanager-future-thread-3" daemon [_thread_blocked, id=16240, stack(0x0000004ae1600000,0x0000004ae1700000)]
+  0x000001b41c042800 JavaThread "jobmanager-future-thread-2" daemon [_thread_blocked, id=14188, stack(0x0000004ae1500000,0x0000004ae1600000)]
+  0x000001b41c044000 JavaThread "SourceCoordinator-Source: flink_source_Student[1]-worker-thread-1" daemon [_thread_blocked, id=20352, stack(0x0000004ae1400000,0x0000004ae1500000)]
+  0x000001b41c048000 JavaThread "snapshot-splitting" [_thread_blocked, id=17748, stack(0x0000004ae1300000,0x0000004ae1400000)]
+  0x000001b41c049800 JavaThread "pool-1-thread-1" [_thread_blocked, id=8236, stack(0x0000004ade800000,0x0000004ade900000)]
+  0x000001b41c047000 JavaThread "jobmanager-future-thread-1" daemon [_thread_blocked, id=13060, stack(0x0000004adcc00000,0x0000004adcd00000)]
+  0x000001b41c046800 JavaThread "DestroyJavaVM" [_thread_blocked, id=10936, stack(0x0000004adce00000,0x0000004adcf00000)]
+  0x000001b41c048800 JavaThread "Checkpoint Timer" daemon [_thread_blocked, id=8856, stack(0x0000004ae1200000,0x0000004ae1300000)]
+  0x000001b41c045800 JavaThread "SourceCoordinator-Source: flink_source_Student[1]" [_thread_blocked, id=11052, stack(0x0000004ae1100000,0x0000004ae1200000)]
+  0x000001b41cafa000 JavaThread "Flink-DispatcherRestEndpoint-thread-3" daemon [_thread_blocked, id=3036, stack(0x0000004ae1000000,0x0000004ae1100000)]
+  0x000001b413e40000 JavaThread "connection-pool-47.120.73.205:3307 housekeeper" daemon [_thread_blocked, id=9868, stack(0x0000004adf200000,0x0000004adf300000)]
+  0x000001b41caf5800 JavaThread "Flink-DispatcherRestEndpoint-thread-2" daemon [_thread_blocked, id=11892, stack(0x0000004ae0e00000,0x0000004ae0f00000)]
+  0x000001b41cafb800 JavaThread "mysql-cj-abandoned-connection-cleanup" daemon [_thread_blocked, id=4816, stack(0x0000004ade900000,0x0000004adea00000)]
+  0x000001b41caf7000 JavaThread "jobmanager_3-main-scheduler-thread-1" daemon [_thread_blocked, id=8572, stack(0x0000004ae0d00000,0x0000004ae0e00000)]
+  0x000001b41caf4800 JavaThread "jobmanager-io-thread-1" daemon [_thread_blocked, id=19736, stack(0x0000004adf400000,0x0000004adf500000)]
+  0x000001b41caf8800 JavaThread "taskmanager_0-main-scheduler-thread-1" daemon [_thread_blocked, id=17012, stack(0x0000004ae0c00000,0x0000004ae0d00000)]
+  0x000001b413e4e800 JavaThread "flink-akka.actor.default-dispatcher-12" [_thread_blocked, id=21328, stack(0x0000004ae0500000,0x0000004ae0600000)]
+  0x000001b413e4d800 JavaThread "resourcemanager_2-main-scheduler-thread-1" daemon [_thread_blocked, id=7420, stack(0x0000004ae0400000,0x0000004ae0500000)]
+  0x000001b413e4d000 JavaThread "mini-cluster-io-thread-4" daemon [_thread_blocked, id=2172, stack(0x0000004ae0300000,0x0000004ae0400000)]
+  0x000001b413e4c000 JavaThread "pool-2-thread-1" [_thread_blocked, id=14844, stack(0x0000004ae0200000,0x0000004ae0300000)]
+  0x000001b413e4b800 JavaThread "mini-cluster-io-thread-3" daemon [_thread_blocked, id=19264, stack(0x0000004ae0100000,0x0000004ae0200000)]
+  0x000001b413e44000 JavaThread "mini-cluster-io-thread-2" daemon [_thread_blocked, id=19896, stack(0x0000004ae0000000,0x0000004ae0100000)]
+  0x000001b413e4a800 JavaThread "Flink-DispatcherRestEndpoint-thread-1" daemon [_thread_blocked, id=3484, stack(0x0000004adff00000,0x0000004ae0000000)]
+  0x000001b413e49000 JavaThread "mini-cluster-io-thread-1" daemon [_thread_blocked, id=21256, stack(0x0000004ade600000,0x0000004ade700000)]
+  0x000001b413e48800 JavaThread "flink-rest-server-netty-boss-thread-1" daemon [_thread_in_native, id=10304, stack(0x0000004ade500000,0x0000004ade600000)]
+  0x000001b413e4a000 JavaThread "Flink-MetricRegistry-thread-1" daemon [_thread_blocked, id=1060, stack(0x0000004adfe00000,0x0000004adff00000)]
+  0x000001b413e42800 JavaThread "IOManager reader thread #1" daemon [_thread_blocked, id=15664, stack(0x0000004adfd00000,0x0000004adfe00000)]
+  0x000001b413e46000 JavaThread "IOManager writer thread #1" daemon [_thread_blocked, id=2688, stack(0x0000004adfc00000,0x0000004adfd00000)]
+  0x000001b413e41000 JavaThread "Timer-2" daemon [_thread_blocked, id=19260, stack(0x0000004adfb00000,0x0000004adfc00000)]
+  0x000001b413e45800 JavaThread "Timer-1" daemon [_thread_blocked, id=1532, stack(0x0000004adfa00000,0x0000004adfb00000)]
+  0x000001b413e47000 JavaThread "BLOB Server listener at 58268" daemon [_thread_in_native, id=6460, stack(0x0000004adf900000,0x0000004adfa00000)]
+  0x000001b413e41800 JavaThread "Timer-0" daemon [_thread_blocked
