@@ -16,6 +16,7 @@ import (
 var (
 	DB                *gorm.DB
 	DB_flink          *gorm.DB
+	DB_Authorize      *gorm.DB
 	SshDatabaseClient *ssh.Client
 )
 
@@ -48,16 +49,13 @@ func DialWithPassword(hostname string, port int, username string, password strin
 }
 
 func Init(hostname string, port int, username string, password string, dbname string) (*gorm.DB, error) {
-	// db, err := gorm.Open("mysql",
-	// 	fmt.Sprintf("%s:%s@mysql+tcp(%s:%d)/%s?charset=utf8&parseTime=True",
-	// 		username, password, hostname, port, dbname))
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// DB = db
-	// return db, nil
 	var err error
 	DB, err = gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, hostname, port, dbname))
+	if err != nil {
+		return nil, err
+	}
+
+	DB_Authorize, err = gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, hostname, port, "mysql"))
 	if err != nil {
 		return nil, err
 	}

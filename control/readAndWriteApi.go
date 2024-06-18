@@ -5,7 +5,9 @@ import (
 	"backend/mysql"
 	"backend/response"
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -47,58 +49,74 @@ func Byte2Str(b []byte) string {
 func InterpretUserWritingRequest(c *gin.Context) {
 	var pu_uid uint
 
-	// ****************************************** 从 token 解析用户 id
+	// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 从 token 解析用户 id
 	if data, ok := c.Get("pu_uid"); !ok {
 		response.Fail(c, nil, "没有从token解析出所需信息")
 	} else {
 		pu_uid = data.(uint)
 	}
-	// ****************************************** 解析完毕
+	// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑  解析完毕
 
+	// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 暂定前端需要发送以下信息
 	var m struct {
 		projectName string `json:"projectName"`
 		tableName   string `json:"tableName"`
 		sqlCommand  string `json:"sqLCommand"`
 	}
 	if e := c.ShouldBindJSON(&m); e != nil {
-		response.Fail(c, nil, "提交事务时出错")
+		response.Fail(c, gin.H{"data": "请检查数据格式"}, "提交事务时出错")
 	}
+	// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 暂定前端需要发送以上信息
 
-	// ****************************************** 检查权限
+	// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 检查权限
 	var authType struct {
 		PT_uid  uint `gorm:"column:P_uid;primary_key" json:"P_uid"`
 		P_level uint `gorm:"column:P_level" json:"P_level"`
 	}
+
 	err := mysql.DB.Select(`
-		SELECT Permission.P_level, Permission.PT_uid 
+		SELECT Permission.PT_uid, Permission.P_level
 		From Permission, ProjectTable 
 		Where Permission.pu_uid = ? AND Permission.PT_uid = ProjectTable.PT_uid`, pu_uid).First(&authType).Error
+	// 用户必须具有写权限，否则毫无意义
 	if err != nil && authType.P_level < 2 {
-		response.Fail(c, nil, "检查权限时出错")
+		response.Fail(c, gin.H{"data": "无权限"}, "检查权限时出错")
 	}
-	// ****************************************** 权限检查完毕
+	// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 权限检查完毕
 
 	m.tableName = SQLParser.SQLTreeGenerator(m.sqlCommand).StmtTree.Table.Name.Original
 
-	//查找目标表的主键
-	tx := mysql.DB.Begin()
+	// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 查找数据源参数
 	var result struct {
 		PT_uid               uint   `gorm:"column:PT_uid" json:"PT_uid"`
 		PT_remote_db_name    string `gorm:"column:PT_remote_db_name;type:VARCHAR(64)" json:"PT_remote_db_name"`
 		PT_remote_table_name string `gorm:"column:PT_remote_table_name;type:VARCHAR(64)" json:"PT_remote_table_name"`
+		PT_remote_hostname   string `gorm:"column:PT_remote_hostname;type:VARCHAR(64)" json:"PT_remote_hostname"`
+		PT_remote_username   string `gorm:"column:PT_remote_username;type:VARCHAR(64)" json:"PT_remote_username"`
+		PT_remote_password   string `gorm:"column:PT_remote_password;type:VARCHAR(64)" json:"PT_remote_password"`
+		PT_remote_port       uint   `gorm:"column:PT_remote_port" json:"PT_remote_port"`
 	}
-	err = tx.Raw(`
-		SELECT ProjectTable.PT_uid, ProjectTable.PT_remote_db_name, ProjectTable.PT_remote_table_name FROM 
+	err = mysql.DB.Select(`
+		SELECT ProjectTable.PT_uid, ProjectTable.PT_remote_db_name, ProjectTable.PT_remote_table_name, ProjectTable.PT_remote_hostname, ProjectTable.PT_remote_userName , ProjectTable.PT_remote_password, ProjectTable.PT_remote_port 
+		FROM 
 			(SELECT ProjectUser.PU_uid FROM User LEFT JOIN ProjectUser ON User.U_uid=ProjectUser.U_uid WHERE User.U_username = ? ) T1
 			LEFT JOIN ProjectTable on T1.PU_uid = ProjectTable.PU_uid	
 		WHERE ProjectTable.PT_name=?
 	`, m.projectName, m.tableName).First(&result).Error
 	if err != nil {
-		tx.Rollback()
-		response.Fail(c, nil, "查找表时出错")
+		response.Fail(c, gin.H{"data": "无相关项目"}, "查找表时出错")
+	}
+	// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 查找数据源参数
+
+	// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 替换为后台数据库以及表名
+	// 首先连接用户数据源
+	DB_Origin, e := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", result.PT_remote_username, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name))
+	if e != nil {
+		response.Fail(c, gin.H{"data": "连接数据源出错"}, "连接数据源出错")
 	}
 
-	// ****************************************** 替换为后台数据库以及表名
+	tx := DB_Origin.Begin()
+
 	m.sqlCommand = strings.ReplaceAll(m.sqlCommand, m.projectName, result.PT_remote_db_name)
 	m.sqlCommand = strings.ReplaceAll(m.sqlCommand, m.tableName, result.PT_remote_table_name)
 
@@ -107,39 +125,27 @@ func InterpretUserWritingRequest(c *gin.Context) {
 	response.Success(c, gin.H{"rowsAffected": rowsAffected}, "")
 }
 
-func InterpretUserReadingRequest(c *gin.Context) {
-	var pu_uid uint
+// SuperviseReadingAuth 并不是可用的路由，仅用于管理用户的读权限
+func SuperviseReadingAuth(mysqlUser string, mysqlPassword string, targetTable string, grantOrRevoke bool) bool {
+	if grantOrRevoke {
+		err := mysql.DB_Authorize.Exec(`
+		GRANT SELECT ON flink_target.? TO '?'@'%' IDENTIFIED BY '?'
+	`, targetTable, mysqlUser, mysqlPassword).Error
 
-	// ****************************************** 从 token 解析用户 id
-	if data, ok := c.Get("pu_uid"); !ok {
-		response.Fail(c, nil, "没有从token解析出所需信息")
+		if err != nil {
+			return false
+		}
+
+		return true
 	} else {
-		pu_uid = data.(uint)
-	}
-	// ****************************************** 解析完毕
+		err := mysql.DB_Authorize.Exec(`
+		REVOKE SELECT ON flink_target.? FROM '?'@'%' IDENTIFIED BY '?' IDENTIFIED BY '?'
+	`, targetTable, mysqlUser, mysqlPassword).Error
 
-	var m struct {
-		projectName string `json:"projectName"`
-		tableName   string `json:"tableName"`
-		sqlCommand  string `json:"sqLCommand"`
-	}
-	if e := c.ShouldBindJSON(&m); e != nil {
-		response.Fail(c, nil, "提交事务时出错")
-	}
+		if err != nil {
+			return false
+		}
 
-	// ****************************************** 检查权限
-	var authType struct {
-		PT_uid  uint `gorm:"column:P_uid;primary_key" json:"P_uid"`
-		P_level uint `gorm:"column:P_level" json:"P_level"`
+		return true
 	}
-	err := mysql.DB.Select(`
-		SELECT Permission.P_level, Permission.PT_uid 
-		From Permission, ProjectTable 
-		Where Permission.pu_uid = ? AND Permission.PT_uid = ProjectTable.PT_uid`, pu_uid).First(&authType).Error
-	if err != nil || authType.PT_uid == 0 {
-		response.Fail(c, nil, "检查权限时出错")
-	}
-	// ****************************************** 权限检查完毕
-
-	response.Success(c, gin.H{}, "")
 }

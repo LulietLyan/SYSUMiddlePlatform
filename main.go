@@ -92,6 +92,7 @@ func Execute() error {
 
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()
+		defer mysql.DB_Authorize.Close()
 		// defer mysql.SshDatabaseClient.Close()
 
 		r := router.SetupRouter() // 初始化路由

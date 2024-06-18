@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="新增sql解析">
+    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="update reading">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/control/data_analyse.go" beforeDir="false" afterPath="$PROJECT_DIR$/control/data_analyse.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/control/readAndWriteApi.go" beforeDir="false" afterPath="$PROJECT_DIR$/control/readAndWriteApi.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/mysql/user.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -21,7 +23,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://D:/GO/go1.20.6.windows-amd64/go" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../GO/go1.20.6.windows-amd64/go" />
   <component name="Git.Merge.Settings">
     <option name="BRANCH" value="origin/main" />
   </component>
@@ -71,6 +73,15 @@
   }
 }</component>
   <component name="RunManager">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="backend" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="backend" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <working_directory value="$PROJECT_DIR$" />
@@ -78,6 +89,16 @@
       <package value="backend" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="backend" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <package value="backend" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <recent_temporary>
@@ -97,6 +118,10 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="update reading" />
+    <option name="LAST_COMMIT_MESSAGE" value="update reading" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

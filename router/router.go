@@ -11,7 +11,6 @@ func RouterInit(r *gin.RouterGroup) {
 	r.Static("/logo", "./image")
 	api := r.Group("api")
 	{
-		api.Use(logic.AuthMiddleware()) //应该只影响后面的，如果前面的也受影响，可能是gin版本不同
 
 		api.POST("/applyauth", control.ApplyForTableAuth)
 
@@ -22,6 +21,9 @@ func RouterInit(r *gin.RouterGroup) {
 			auth.POST("/login", control.UserLogin)
 			auth.POST("/signup", control.SignUp)
 		}
+
+		// 按照时间顺序，这一行千万不要放到更前面，因为登录注册是不需要 token 的，但以后的操作要
+		api.Use(logic.AuthMiddleware())
 
 		user := api.Group("/user")
 		{
@@ -90,7 +92,6 @@ func RouterInit(r *gin.RouterGroup) {
 		rNw := api.Group("/rNw")
 		{
 			rNw.POST("/request/write", control.InterpretUserWritingRequest)
-			rNw.POST("/request/read", control.InterpretUserReadingRequest)
 		}
 	}
 }
@@ -99,7 +100,7 @@ func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	// 添加CORS中间件
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:2020", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
+	config.AllowOrigins = []string{"http://localhost:2020", "http://localhost:5173", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
 		"http://localhost:8084", "http://localhost:8085"} // 允许访问的域名
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
 	router.Use(cors.New(config))
