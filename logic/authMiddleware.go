@@ -1,7 +1,8 @@
 package logic
 
 import (
-	"backend/response"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +22,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, claims, err := ParseToken(tokenString)
 		if err != nil || !token.Valid {
-			response.Fail(c, gin.H{"code": 401, "data": ""}, "token无效")
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "token无效"})
 			c.Abort()
 			return
 		}

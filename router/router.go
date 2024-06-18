@@ -3,31 +3,27 @@ package router
 import (
 	"backend/control"
 	"backend/logic"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func RouterInit(r *gin.RouterGroup) {
+
 	r.Static("/logo", "./image")
 	api := r.Group("api")
 	{
-		api.Use(logic.AuthMiddleware()) //应该只影响后面的，如果前面的也受影响，可能是gin版本不同
-
-		api.POST("/applyauth", control.ApplyForTableAuth)
-
-		api.POST("/projectdetail", control.GetProjectDetail)
-
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", control.UserLogin)
 			auth.POST("/signup", control.SignUp)
 		}
 
+		api.Use(logic.AuthMiddleware()) //应该只影响后面的，如果前面的也受影响，可能是gin版本不同
 		user := api.Group("/user")
 		{
 			user.PUT("/password", control.UpdatePassword)
 		}
-
 		message := api.Group("/message")
 		{
 			message.DELETE("", control.DeleteMessage)
@@ -37,7 +33,7 @@ func RouterInit(r *gin.RouterGroup) {
 			message.POST("/search/pages", control.GetMessagePageNumSearch)
 			message.GET("/avgs", control.GetAllAvg)
 		}
-
+		api.POST("/applyauth", control.ApplyForTableAuth)
 		project := api.Group("/project")
 		{
 			project.GET("", control.GetProjectBrief)
@@ -49,7 +45,7 @@ func RouterInit(r *gin.RouterGroup) {
 			project.GET("/getallprojecttable", control.GetAllProjectTable)
 			project.DELETE("/deleteprojecttable", control.DeleteProjectTable)
 		}
-
+		api.POST("/projectdetail", control.GetProjectDetail)
 		apiinfo := api.Group("/apiinfo")
 		{
 			apiinfo.GET("", control.GetApiBrief)
@@ -59,7 +55,6 @@ func RouterInit(r *gin.RouterGroup) {
 			apiinfo.GET("/details", control.GetApiDetail)
 			apiinfo.POST("", control.SaveApi)
 		}
-
 		developer := api.Group("/developer/project")
 		{
 			developer.POST("/img", control.UploadLogo)
@@ -67,7 +62,6 @@ func RouterInit(r *gin.RouterGroup) {
 			developer.POST("/member", control.UpdateProjectMember)
 			developer.DELETE("/member", control.DeleteMember)
 		}
-
 		admin := api.Group("/admin")
 		{
 			admin.GET("/users", control.GetAllUser)
@@ -86,12 +80,6 @@ func RouterInit(r *gin.RouterGroup) {
 			admin.POST("/requests/approve", control.ApprovePermissionRequest)
 			admin.GET("/sysinfo", control.GetSystemInfo)
 		}
-
-		rNw := api.Group("/rNw")
-		{
-			rNw.POST("/request/write", control.InterpretUserWritingRequest)
-			rNw.POST("/request/read", control.InterpretUserReadingRequest)
-		}
 	}
 }
 
@@ -100,7 +88,7 @@ func SetupRouter() *gin.Engine {
 	// 添加CORS中间件
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:2020", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
-		"http://localhost:8084", "http://localhost:8085"} // 允许访问的域名
+		"http://localhost:8084", "http://localhost:8085", "http://localhost:5173"} // 允许访问的域名
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
 	router.Use(cors.New(config))
 	api := router.Group("")

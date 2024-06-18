@@ -19,9 +19,9 @@ func ApplyForTableAuth(c *gin.Context) {
 	}
 	//解析请求参数
 	type msg struct {
-		projectName string `json:"projectName"`
-		tableName   string `json:"tableName"`
-		authType    string `json:"authType"`
+		Projectname string `json:"projectname"`
+		TableName   string `json:"tableName"`
+		AuthType    string `json:"authType"`
 	}
 	var m msg
 	if e := c.ShouldBindJSON(&m); e != nil {
@@ -30,7 +30,7 @@ func ApplyForTableAuth(c *gin.Context) {
 	}
 	//翻译权限等级
 	var prLevel uint
-	switch m.authType {
+	switch m.AuthType {
 	case "只读":
 		prLevel = 1
 	case "读写":
@@ -51,7 +51,7 @@ func ApplyForTableAuth(c *gin.Context) {
 			(SELECT ProjectUser.PU_uid FROM User LEFT JOIN ProjectUser ON User.U_uid=ProjectUser.U_uid WHERE User.U_username = ? ) T1
 			LEFT JOIN ProjectTable on T1.PU_uid = ProjectTable.PU_uid	
 		WHERE ProjectTable.PT_name=?
-	`, m.projectName, m.tableName).First(&result).Error
+	`, m.Projectname, m.TableName).First(&result).Error
 	if err != nil {
 		tx.Rollback()
 		response.Fail(c, nil, "查找表时出错")
