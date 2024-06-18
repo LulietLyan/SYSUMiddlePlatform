@@ -201,9 +201,8 @@ func get_all_avg(student_id int) (returnAvgs []returnAvg, err error) {
 		SQLResult23[0].Patents,
 		SQLResult23[0].SoftwareCopyrights,
 		SQLResult23[0].MonographsPublished})
-	return returnAvgs,nil
+	return returnAvgs, nil
 }
-
 
 func GetAllAvg(c *gin.Context) {
 	type msg struct {

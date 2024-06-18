@@ -30,6 +30,7 @@ func RouterInit(r *gin.RouterGroup) {
 			message.GET("/pages", control.GetMessagePageNum)
 			message.POST("/search", control.GetMessageSearch)
 			message.POST("/search/pages", control.GetMessagePageNumSearch)
+			message.GET("/avgs", control.GetAllAvg)
 		}
 		api.POST("/applyauth", control.ApplyForTableAuth)
 		project := api.Group("/project")
