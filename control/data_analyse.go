@@ -212,7 +212,7 @@ func GetAllAvg(c *gin.Context) {
 	var m msg
 	if e := c.ShouldBindJSON(&m); e == nil {
 		if returnAvgs, err := get_all_avg(m.Id); err == nil {
-			response.Success(c, gin.H{"avg": returnAvgs}, "")
+			response.Success(c, gin.H{"avg1": returnAvgs[0], "avg2": returnAvgs[1], "avg3": returnAvgs[2]}, "")
 		}
 		response.Fail(c, nil, "")
 	} else { //JSON解析失败
