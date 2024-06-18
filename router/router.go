@@ -35,6 +35,7 @@ func RouterInit(r *gin.RouterGroup) {
 			message.GET("/pages", control.GetMessagePageNum)
 			message.POST("/search", control.GetMessageSearch)
 			message.POST("/search/pages", control.GetMessagePageNumSearch)
+			message.GET("/avgs", control.GetAllAvg)
 		}
 
 		project := api.Group("/project")
