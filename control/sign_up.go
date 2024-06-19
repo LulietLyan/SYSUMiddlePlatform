@@ -81,8 +81,9 @@ func SignUp(c *gin.Context) {
 			}
 		} else if uType == 0 {
 			puRecord := models.ProjectUser{
-				U_uid:    userRecord.U_uid,
-				PU_email: m.Email,
+				U_uid:       userRecord.U_uid,
+				PU_email:    m.Email,
+				PU_logo_url: "/logo/default",
 			}
 			if e := tx.Create(&puRecord).Error; e != nil {
 				tx.Rollback()
