@@ -11,11 +11,6 @@ func RouterInit(r *gin.RouterGroup) {
 	r.Static("/logo", "./image")
 	api := r.Group("api")
 	{
-
-		api.POST("/applyauth", control.ApplyForTableAuth)
-
-		api.POST("/projectdetail", control.GetProjectDetail)
-
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", control.UserLogin)
@@ -24,6 +19,10 @@ func RouterInit(r *gin.RouterGroup) {
 
 		// 按照时间顺序，这一行千万不要放到更前面，因为登录注册是不需要 token 的，但以后的操作要
 		api.Use(logic.AuthMiddleware())
+
+		api.POST("/applyauth", control.ApplyForTableAuth)
+
+		api.POST("/projectdetail", control.GetProjectDetail)
 
 		user := api.Group("/user")
 		{
@@ -106,8 +105,5 @@ func SetupRouter() *gin.Engine {
 	router.Use(cors.New(config))
 	api := router.Group("")
 	RouterInit(api)
-	// UserRouterInit(api)
-	//NewsRouterInit(api)
-	//CommentRouterInit(api)
 	return router
 }
