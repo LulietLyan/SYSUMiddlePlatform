@@ -4,13 +4,37 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="update writing and reading">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2024_6_16_22_05_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2024_6_16_22_05__Changes_.xml" beforeDir="false" />
+    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="User 新增用户数据源 mysql 用户及密码，前端应提供相应的操作选项">
+      <change afterPath="$PROJECT_DIR$/MySqlLexer.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MySqlParser.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SQLParser/parser.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/antlr-4.13.1-complete.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlLexer.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlLexer.interp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlLexer.tokens" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlParser.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlParser.interp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/MySqlParser.tokens" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysql_lexer.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysql_parser.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysqlparser_base_listener.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysqlparser_base_visitor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysqlparser_listener.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/mysqlparser_visitor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/db.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/string.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/time.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/util.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/uuid.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SQLParser/SQLTreeGenerator.go" beforeDir="false" afterPath="$PROJECT_DIR$/SQLParser/SQLTreeGenerator.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/control/readAndWriteApi.go" beforeDir="false" afterPath="$PROJECT_DIR$/control/readAndWriteApi.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logic/authMiddleware.go" beforeDir="false" afterPath="$PROJECT_DIR$/logic/authMiddleware.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/ParsedSQLTree.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/ParsedSQLTree.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/mysql/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/response/response.go" beforeDir="false" afterPath="$PROJECT_DIR$/response/response.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,25 +83,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "Go Build.go build main.go.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "C:/Users/10788",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Build.go build main.go.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/10788&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="backend" />
@@ -126,9 +151,11 @@
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="update reading" />
     <MESSAGE value="update writing and reading" />
-    <option name="LAST_COMMIT_MESSAGE" value="update writing and reading" />
+    <MESSAGE value="User 新增用户数据源 mysql 用户及密码，前端应提供相应的操作选项" />
+    <option name="LAST_COMMIT_MESSAGE" value="User 新增用户数据源 mysql 用户及密码，前端应提供相应的操作选项" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

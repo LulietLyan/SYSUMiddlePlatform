@@ -20,9 +20,8 @@ func SQLTreeGenerator(sqlCommand string) models.SQLTreeJSON {
 
 	for _, stmtNode := range stmtNodes {
 		s.GetResult(stmtNode)
+		json.Unmarshal([]byte(utils.PrintResult(stmtNode, true)), &stj)
 	}
-
-	json.Unmarshal([]byte(utils.PrintResult(s.SQLTree, true)), &stj)
 
 	return stj
 }

@@ -31,8 +31,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		userId := claims.UserId
 		identity := claims.Identity
 		pu_uid := claims.PU_uid
-		// var user models.User
-		// mysql.DB.First(&user, userId) //默认用户存在
+
 		c.Set("userId", userId)
 		c.Set("identity", identity)
 		c.Set("pu_uid", pu_uid)

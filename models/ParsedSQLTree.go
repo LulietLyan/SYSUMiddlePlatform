@@ -1,68 +1,79 @@
 package models
 
 // 通过解析语法树获得的输出
+type ParsedResult struct {
+	RequestId string `json:"request_id"`
+	Code      string `json:"code"`
+	Data      []struct {
+		Tables []string `json:"tables"`
+		Type   string   `json:"type"`
+		Query  string   `json:"query"`
+	} `json:"data"`
+	Message string `json:"message"`
+}
+
 type SQLTreeJSON struct {
-	StmtType string `json:"StmtType"`
-	StmtTree struct {
-		IfNotExists bool `json:"IfNotExists"`
-		IsTemporary bool `json:"IsTemporary"`
-		Table       struct {
-			Schema struct {
-				LowerCase string `json:"lower-case"`
-				Original  string `json:"original"`
-			} `json:"Schema"`
-			Name struct {
-				LowerCase string `json:"lower-case"`
-				Original  string `json:"original"`
-			} `json:"Name"`
-			IndexHints     interface{}   `json:"IndexHints"`
-			PartitionNames []interface{} `json:"PartitionNames"`
+	IsReplace bool `json:"IsReplace"`
+	IgnoreErr bool `json:"IgnoreErr"`
+	Table     struct {
+		TableRefs struct {
+			Left struct {
+				Source struct {
+					Schema struct {
+						O string `json:"O"`
+						L string `json:"L"`
+					} `json:"Schema"`
+					Name struct {
+						O string `json:"O"`
+						L string `json:"L"`
+					} `json:"Name"`
+					DBInfo         interface{} `json:"DBInfo"`
+					TableInfo      interface{} `json:"TableInfo"`
+					IndexHints     interface{} `json:"IndexHints"`
+					PartitionNames interface{} `json:"PartitionNames"`
+				} `json:"Source"`
+				AsName struct {
+					O string `json:"O"`
+					L string `json:"L"`
+				} `json:"AsName"`
+			} `json:"Left"`
+			Right        interface{} `json:"Right"`
+			Tp           int         `json:"Tp"`
+			On           interface{} `json:"On"`
+			Using        interface{} `json:"Using"`
+			NaturalJoin  bool        `json:"NaturalJoin"`
+			StraightJoin bool        `json:"StraightJoin"`
+		} `json:"TableRefs"`
+	} `json:"Table"`
+	Columns []struct {
+		Schema struct {
+			O string `json:"O"`
+			L string `json:"L"`
+		} `json:"Schema"`
+		Table struct {
+			O string `json:"O"`
+			L string `json:"L"`
 		} `json:"Table"`
-		ReferTable interface{} `json:"ReferTable"`
-		Columns    []struct {
-			Name struct {
-				Schema struct {
-					LowerCase string `json:"lower-case"`
-					Original  string `json:"original"`
-				} `json:"Schema"`
-				Table struct {
-					LowerCase string `json:"lower-case"`
-					Original  string `json:"original"`
-				} `json:"Table"`
-				Name struct {
-					LowerCase string `json:"lower-case"`
-					Original  string `json:"original"`
-				} `json:"Name"`
-			} `json:"Name"`
-			Type struct {
-				Datatype string      `json:"Datatype"`
-				Flag     int         `json:"Flag"`
-				Fieldlen int         `json:"Fieldlen"`
-				Decimal  int         `json:"Decimal"`
-				Charset  string      `json:"Charset"`
-				Collate  string      `json:"Collate"`
-				Elems    interface{} `json:"Elems"`
-			} `json:"Type"`
-			Options []struct {
-				Type                string      `json:"Type"`
-				Expr                *string     `json:"Expr"`
-				Stored              bool        `json:"Stored"`
-				Refer               interface{} `json:"Refer"`
-				StrValue            string      `json:"StrValue"`
-				AutoRandomBitLength int         `json:"AutoRandomBitLength"`
-				Enforced            bool        `json:"Enforced"`
-				ConstraintName      string      `json:"ConstraintName"`
-			} `json:"Options"`
-		} `json:"Columns"`
-		Constraints interface{} `json:"Constraints"`
-		Options     []struct {
-			Type       string      `json:"Type"`
-			Default    bool        `json:"Default"`
-			Value      string      `json:"Value"`
-			TableNames interface{} `json:"TableNames"`
-		} `json:"Options"`
-		Partition   interface{} `json:"Partition"`
-		OnDuplicate string      `json:"OnDuplicate"`
-		Select      interface{} `json:"Select"`
-	} `json:"StmtTree"`
+		Name struct {
+			O string `json:"O"`
+			L string `json:"L"`
+		} `json:"Name"`
+	} `json:"Columns"`
+	Lists [][]struct {
+		Type struct {
+			Tp      int         `json:"Tp"`
+			Flag    int         `json:"Flag"`
+			Flen    int         `json:"Flen"`
+			Decimal int         `json:"Decimal"`
+			Charset string      `json:"Charset"`
+			Collate string      `json:"Collate"`
+			Elems   interface{} `json:"Elems"`
+		} `json:"Type"`
+	} `json:"Lists"`
+	Setlist        interface{}   `json:"Setlist"`
+	Priority       int           `json:"Priority"`
+	OnDuplicate    interface{}   `json:"OnDuplicate"`
+	Select         interface{}   `json:"Select"`
+	PartitionNames []interface{} `json:"PartitionNames"`
+	TableHints     interface{}   `json:"TableHints"`
 }

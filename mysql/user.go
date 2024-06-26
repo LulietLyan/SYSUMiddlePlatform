@@ -60,7 +60,11 @@ func Init(hostname string, port int, username string, password string, dbname st
 		return nil, err
 	}
 
-	DB_flink, _ = InitFlink(hostname, port, username, password, "flink_target")
+	DB_flink, err = InitFlink(hostname, port, username, password, "flink_target")
+	if err != nil {
+		return nil, err
+	}
+
 	return DB, DB.Set("gorm:table_options", "charset=utf8mb4").
 		AutoMigrate(&models.User{}).
 		AutoMigrate(&models.AnalyticalUser{}).
