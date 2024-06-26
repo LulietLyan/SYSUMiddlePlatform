@@ -99,8 +99,12 @@ func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	// 添加CORS中间件
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:2020", "http://localhost:5173", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "http://localhost:8083",
-		"http://localhost:8084", "http://localhost:8085"} // 允许访问的域名
+	// 允许访问的域名
+	config.AllowOrigins = []string{
+		"http://localhost:2020", "http://localhost:5173", "http://localhost:8080", "http://localhost:8081",
+		"http://localhost:8082", "http://localhost:8083", "http://localhost:8084", "http://localhost:8085",
+		"http://localhost:8086", "http://localhost:8087", "http://localhost:8088", "http://localhost:8089",
+	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"} // 允许的HTTP方法
 	router.Use(cors.New(config))
 	api := router.Group("")
