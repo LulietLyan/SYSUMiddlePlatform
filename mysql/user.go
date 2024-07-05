@@ -17,6 +17,7 @@ var (
 	DB                *gorm.DB
 	DB_flink          *gorm.DB
 	DB_Authorize      *gorm.DB
+	DB_Demon          *gorm.DB
 	SshDatabaseClient *ssh.Client
 )
 
@@ -56,6 +57,11 @@ func Init(hostname string, port int, username string, password string, dbname st
 	}
 
 	DB_Authorize, err = gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, hostname, port, "mysql"))
+	if err != nil {
+		return nil, err
+	}
+
+	DB_Demon, err = gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, hostname, port, "source"))
 	if err != nil {
 		return nil, err
 	}

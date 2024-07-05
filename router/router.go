@@ -91,6 +91,7 @@ func RouterInit(r *gin.RouterGroup) {
 		rNw := api.Group("/rNw")
 		{
 			rNw.POST("/request/write", control.InterpretUserWritingRequest)
+			rNw.POST("/request/testWriting", control.TestWriting)
 		}
 	}
 }

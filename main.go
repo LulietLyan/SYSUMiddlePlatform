@@ -57,6 +57,8 @@ func Execute() error {
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()
 		defer mysql.DB_Authorize.Close()
+		defer mysql.DB_Demon.Close()
+		defer mysql.DB_flink.Close()
 		// defer mysql.SshDatabaseClient.Close()
 
 		r := router.SetupRouter() // 初始化路由
@@ -64,9 +66,9 @@ func Execute() error {
 		if err := r.Run(":2020"); err != nil {
 			return err
 		}
-
 		port := viper.GetString("port")
 		log.Println("port = *** =", port)
+
 		return http.ListenAndServe(port, nil) // listen and serve
 	}
 

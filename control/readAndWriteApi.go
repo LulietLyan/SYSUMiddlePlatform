@@ -2,49 +2,23 @@ package control
 
 import (
 	"backend/SQLParser"
+	"backend/models"
 	"backend/mysql"
 	"backend/response"
-	"database/sql"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"reflect"
+	"io"
+	"net/http"
 	"strings"
-	"unsafe"
 )
 
-func scanRows2map(rows *sql.Rows) []map[string]string {
-	res := make([]map[string]string, 0)               //  定义结果 map
-	colTypes, _ := rows.ColumnTypes()                 // 列信息
-	var rowParam = make([]interface{}, len(colTypes)) // 传入到 rows.Scan 的参数 数组
-	var rowValue = make([]interface{}, len(colTypes)) // 接收数据一行列的数组
-
-	for i, colType := range colTypes {
-		rowValue[i] = reflect.New(colType.ScanType())           // 跟据数据库参数类型，创建默认值 和类型
-		rowParam[i] = reflect.ValueOf(&rowValue[i]).Interface() // 跟据接收的数据的类型反射出值的地址
-
-	}
-	// 遍历
-	for rows.Next() {
-		rows.Scan(rowParam...) // 赋值到 rowValue 中
-		record := make(map[string]string)
-		for i, colType := range colTypes {
-
-			if rowValue[i] == nil {
-				record[colType.Name()] = ""
-			} else {
-				record[colType.Name()] = Byte2Str(rowValue[i].([]byte))
-			}
-		}
-		res = append(res, record)
-	}
-	return res
-}
-
-// []byte to string
-func Byte2Str(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
+var (
+	tokenOfUser_1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpblRpbWUiOiIyMDI0LTA2LTI1VDIxOjQwOjM1LjMyMzM3NDMrMDg6MDAiLCJVc2VySWQiOjYsIklkZW50aXR5IjoiRGV2ZWxvcGVyIiwiUFVfdWlkIjozfQ.iGCAMDQil6OkM8Z1dZr-6PBgyGDa800WbezQ7ZHF90U"
+	writeURL      = "https://127.0.0.1:8087/api/rNw/request/write"
+)
 
 func InterpretUserWritingRequest(c *gin.Context) {
 	var pu_uid uint
@@ -57,12 +31,11 @@ func InterpretUserWritingRequest(c *gin.Context) {
 		// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 解析完毕
 
 		// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 暂定前端需要发送以下信息
-		type msg struct {
+		var m struct {
 			ProjectName string `json:"projectName"`
 			TableName   string `json:"tableName"`
 			SqlCommand  string `json:"sqlCommand"`
 		}
-		var m msg
 		if e := c.ShouldBindJSON(&m); e != nil {
 			response.Fail(c, gin.H{"data": "请检查数据格式"}, "提交事务时出错")
 			return
@@ -152,5 +125,90 @@ func SuperviseReadingAuth(mysqlUser string, mysqlPassword string, targetTable st
 		}
 
 		return true
+	}
+}
+
+func TestWriting(c *gin.Context) {
+	var m struct {
+		IWantToTestWriting string `json:"iWantToTestWriting"`
+	}
+
+	if e := c.ShouldBindJSON(&m); e != nil {
+		response.Fail(c, gin.H{"data": "请检查数据格式"}, "提交事务时出错")
+		return
+	} else {
+		var findStudent []models.Student
+		var maxStudentId uint
+		maxStudentId = 500
+		mysql.DB_Demon.Where("student_id>500").Find(&findStudent)
+
+		println("学生 id 大于 500 的目前有以下这些：")
+		println("******************************************************************************")
+		for _, eachStudent := range findStudent {
+			println("student_id: ", eachStudent.StudentId)
+			println("student_type: ", eachStudent.StudentType)
+			println("gender: ", eachStudent.Gender)
+			println("ethnicity: ", eachStudent.Ethnicity)
+			println("birth_str: ", eachStudent.BirthStr)
+			println("education_level: ", eachStudent.EducationLevel)
+			println("political_status: ", eachStudent.PoliticalStatus)
+			println("hometown: ", eachStudent.Hometown)
+			println("gaokao_score: ", eachStudent.GaokaoScore)
+			println("grade: ", eachStudent.Grade)
+			println("class: ", eachStudent.Class)
+			if eachStudent.StudentId > maxStudentId {
+				maxStudentId = eachStudent.StudentId
+			}
+		}
+		println("******************************************************************************")
+
+		client := &http.Client{}
+		var data struct {
+			ProjectName string `json:"projectName"`
+			TableName   string `json:"tableName"`
+			sqlCommand  string `json:"sqlCommand"`
+		}
+		data.ProjectName = "1"
+		data.TableName = "Student"
+		data.sqlCommand = fmt.Sprintf("INSERT INTO Student(student_id) VALUES(?)", maxStudentId+1)
+
+		respdata, _ := json.Marshal(data)
+
+		request, err := http.NewRequest("POST", writeURL, bytes.NewReader(respdata))
+		if err != nil {
+			response.Fail(c, gin.H{"data": "构造 request 时出错"}, "构造 request 时出错")
+			return
+		}
+
+		request.Header.Set("Authorization", tokenOfUser_1)
+
+		responseBody, err := client.Do(request)
+		defer responseBody.Body.Close()
+		content, err := io.ReadAll(responseBody.Body)
+		if err != nil {
+			response.Fail(c, gin.H{"data": "请求写数据时出错"}, "请求写数据时出错")
+			return
+		}
+		println(content)
+
+		mysql.DB_Demon.Select("student_id>500").Find(&findStudent)
+		println("插入一条数据后学生 id 大于 500 的目前有以下这些：")
+		println("******************************************************************************")
+		for _, eachStudent := range findStudent {
+			println("student_id: ", eachStudent.StudentId)
+			println("student_type: ", eachStudent.StudentType)
+			println("gender: ", eachStudent.Gender)
+			println("ethnicity: ", eachStudent.Ethnicity)
+			println("birth_str: ", eachStudent.BirthStr)
+			println("education_level: ", eachStudent.EducationLevel)
+			println("political_status: ", eachStudent.PoliticalStatus)
+			println("hometown: ", eachStudent.Hometown)
+			println("gaokao_score: ", eachStudent.GaokaoScore)
+			println("grade: ", eachStudent.Grade)
+			println("class: ", eachStudent.Class)
+		}
+		println("******************************************************************************")
+
+		response.Success(c, gin.H{"data": "测试成功"}, "")
 	}
 }
