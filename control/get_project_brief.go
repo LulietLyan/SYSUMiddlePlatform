@@ -38,6 +38,7 @@ func GetProjectBrief(c *gin.Context) {
 	var m msg
 	if e := c.ShouldBindQuery(&m); e != nil {
 		response.Fail(c, nil, "数据格式错误!")
+		return
 	}
 
 	var results []struct {

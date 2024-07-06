@@ -4,6 +4,7 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/response"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,14 +46,6 @@ func GetApiBrief(c *gin.Context) {
 		return
 	}
 
-	type apiInfo struct {
-		Title   string `json:"title"`
-		Id      uint   `json:"id"`
-		Content string `json:"content"`
-		Type    string `json:"type"`
-		Time    string `json:"time"`
-	}
-
 	var apiInfos []apiInfo
 	var apiTypes = [4]string{"Midtable", "Require", "User", "Me"}
 	var puRecord models.ProjectUser
@@ -69,5 +62,6 @@ func GetApiBrief(c *gin.Context) {
 		}
 		apiInfos = append(apiInfos, apiInfo{Title: apiRecord.A_name, Id: apiRecord.A_uid, Content: apiRecord.A_description, Type: apiTypes[typeindex], Time: apiRecord.CreatedAt.Format("2006-01-02 15:04")})
 	}
+	sort.Sort(apiInfoSort(apiInfos))
 	response.Success(c, gin.H{"apiInfos": apiInfos}, "")
 }

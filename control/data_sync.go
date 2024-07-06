@@ -247,11 +247,18 @@ func NewProjectTable(c *gin.Context) {
 			pu_uid = data.(uint)
 		}
 		t.Uid = pu_uid
-		// 判断是否已存在
+		// 判断数据源表是否已存在
 		var projectTable1 models.ProjectTable
 		if e := mysql.DB.Where("PU_uid = ? and PT_remote_db_name = ? and PT_remote_table_name = ?",
 			t.Uid, t.RemoteDbName, t.RemoteTableName).First(&projectTable1).Error; e == nil {
 			response.Fail(c, nil, "该项目表已存在!")
+			return
+		}
+		//判断中台表名是否重复
+		var projectTable3 models.ProjectTable
+		if e := mysql.DB.Where("PT_name = ?",
+			t.Name).First(&projectTable3).Error; e == nil {
+			response.Fail(c, nil, "表名在中台中已存在!")
 			return
 		}
 		// 新增记录
