@@ -12,12 +12,13 @@ import (
 	"github.com/jinzhu/gorm"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 var (
 	tokenOfUser_1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpblRpbWUiOiIyMDI0LTA2LTI1VDIxOjQwOjM1LjMyMzM3NDMrMDg6MDAiLCJVc2VySWQiOjYsIklkZW50aXR5IjoiRGV2ZWxvcGVyIiwiUFVfdWlkIjozfQ.iGCAMDQil6OkM8Z1dZr-6PBgyGDa800WbezQ7ZHF90U"
-	writeURL      = "https://127.0.0.1:8087/api/rNw/request/write"
+	writeURL      = "https://127.0.0.1:2020/api/rNw/request/write"
 )
 
 func InterpretUserWritingRequest(c *gin.Context) {
@@ -61,6 +62,8 @@ func InterpretUserWritingRequest(c *gin.Context) {
 
 				m.TableName = SQLParser.SQLTreeGenerator(m.SqlCommand).Table.TableRefs.Left.Source.Name.O
 
+				fmt.Println(m.TableName)
+
 				// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 查找数据源参数
 				var result struct {
 					PT_uid               uint   `gorm:"column:PT_uid" json:"PT_uid"`
@@ -84,7 +87,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 
 					// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 替换为后台数据库以及表名
 					// 首先连接用户数据源
-					DB_Origin, e := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name))
+					DbOrigin, e := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name))
 
 					println(result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name)
 
@@ -92,15 +95,21 @@ func InterpretUserWritingRequest(c *gin.Context) {
 						response.Fail(c, gin.H{"data": "连接数据源出错"}, "连接数据源出错")
 						return
 					} else {
-						m.SqlCommand = strings.ReplaceAll(m.SqlCommand, m.ProjectName, result.PT_remote_db_name)
-						m.SqlCommand = strings.ReplaceAll(m.SqlCommand, m.TableName, result.PT_remote_table_name)
+						//m.SqlCommand = strings.Replace(m.SqlCommand, m.ProjectName, result.PT_remote_db_name, 1)
+						m.SqlCommand = strings.Replace(m.SqlCommand, m.TableName, result.PT_remote_table_name, 1)
 
-						response.Success(c, gin.H{"rowsAffected": DB_Origin.Exec(m.SqlCommand).RowsAffected}, "")
+						fmt.Println(m.SqlCommand)
+
+						response.Success(c, gin.H{"rowsAffected": DbOrigin.Exec(m.SqlCommand).RowsAffected}, "")
 					}
 				}
 			}
 		}
 	}
+}
+
+func InterpretUserReadingRequest(c *gin.Context) {
+
 }
 
 // SuperviseReadingAuth 并不是可用的路由，仅用于管理用户的读权限
@@ -138,77 +147,80 @@ func TestWriting(c *gin.Context) {
 		return
 	} else {
 		var findStudent []models.Student
-		var maxStudentId uint
+		var findStudentAgain []models.Student
+		var maxStudentId int
 		maxStudentId = 500
 		mysql.DB_Demon.Where("student_id>500").Find(&findStudent)
 
 		println("学生 id 大于 500 的目前有以下这些：")
-		println("******************************************************************************")
+		println("*******************************************************************************************************************************************************************************************************")
 		for _, eachStudent := range findStudent {
-			println("student_id: ", eachStudent.StudentId)
-			println("student_type: ", eachStudent.StudentType)
-			println("gender: ", eachStudent.Gender)
-			println("ethnicity: ", eachStudent.Ethnicity)
-			println("birth_str: ", eachStudent.BirthStr)
-			println("education_level: ", eachStudent.EducationLevel)
-			println("political_status: ", eachStudent.PoliticalStatus)
-			println("hometown: ", eachStudent.Hometown)
-			println("gaokao_score: ", eachStudent.GaokaoScore)
-			println("grade: ", eachStudent.Grade)
-			println("class: ", eachStudent.Class)
-			if eachStudent.StudentId > maxStudentId {
-				maxStudentId = eachStudent.StudentId
+			println("student_id: ", eachStudent.StudentId,
+				"student_type: ", eachStudent.StudentType,
+				"gender: ", eachStudent.Gender,
+				"ethnicity: ", eachStudent.Ethnicity,
+				"birth_str: ", eachStudent.BirthStr,
+				"education_level: ", eachStudent.EducationLevel,
+				"political_status: ", eachStudent.PoliticalStatus,
+				"hometown: ", eachStudent.Hometown,
+				"gaokao_score: ", eachStudent.GaokaoScore,
+				"grade: ", eachStudent.Grade,
+				"class: ", eachStudent.Class,
+			)
+			if int(eachStudent.StudentId) > maxStudentId {
+				maxStudentId = int(eachStudent.StudentId)
 			}
 		}
-		println("******************************************************************************")
+		println("*******************************************************************************************************************************************************************************************************")
 
+		var data = make(map[string]interface{})
+
+		data["projectName"] = "1"
+		data["tableName"] = "Student"
+		data["sqlCommand"] = "INSERT INTO Student(student_id, student_type, gender, ethnicity, birth_str, education_level, political_status, hometown, gaokao_score, grade, class) VALUES " + "(" + strconv.Itoa(maxStudentId+1) + ", '境内生', '男', '汉族', '1999|01', '本科生', '群众', 'unknown', 1000, 2024, 1);"
+		fmt.Println(data["sqlCommand"])
 		client := &http.Client{}
-		var data struct {
-			ProjectName string `json:"projectName"`
-			TableName   string `json:"tableName"`
-			sqlCommand  string `json:"sqlCommand"`
-		}
-		data.ProjectName = "1"
-		data.TableName = "Student"
-		data.sqlCommand = fmt.Sprintf("INSERT INTO Student(student_id) VALUES(?)", maxStudentId+1)
 
-		respdata, _ := json.Marshal(data)
-
-		request, err := http.NewRequest("POST", writeURL, bytes.NewReader(respdata))
+		// 将请求参数编码为JSON格式
+		jsonData, err := json.Marshal(data)
 		if err != nil {
-			response.Fail(c, gin.H{"data": "构造 request 时出错"}, "构造 request 时出错")
+			response.Fail(c, gin.H{"data": "JSON编码失败"}, "JSON编码失败")
 			return
 		}
 
+		request, err := http.NewRequest("POST", writeURL, bytes.NewBuffer(jsonData))
+		if err != nil {
+			response.Fail(c, gin.H{"data": "POST 请求失败"}, "POST 请求失败")
+			return
+		}
 		request.Header.Set("Authorization", tokenOfUser_1)
+		resp, err := client.Do(request)
+		defer request.Body.Close()
 
-		responseBody, err := client.Do(request)
-		defer responseBody.Body.Close()
-		content, err := io.ReadAll(responseBody.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			response.Fail(c, gin.H{"data": "请求写数据时出错"}, "请求写数据时出错")
 			return
 		}
 		println(content)
 
-		mysql.DB_Demon.Select("student_id>500").Find(&findStudent)
+		mysql.DB_Demon.Where("student_id>500").Find(&findStudentAgain)
 		println("插入一条数据后学生 id 大于 500 的目前有以下这些：")
-		println("******************************************************************************")
-		for _, eachStudent := range findStudent {
-			println("student_id: ", eachStudent.StudentId)
-			println("student_type: ", eachStudent.StudentType)
-			println("gender: ", eachStudent.Gender)
-			println("ethnicity: ", eachStudent.Ethnicity)
-			println("birth_str: ", eachStudent.BirthStr)
-			println("education_level: ", eachStudent.EducationLevel)
-			println("political_status: ", eachStudent.PoliticalStatus)
-			println("hometown: ", eachStudent.Hometown)
-			println("gaokao_score: ", eachStudent.GaokaoScore)
-			println("grade: ", eachStudent.Grade)
-			println("class: ", eachStudent.Class)
+		println("*******************************************************************************************************************************************************************************************************")
+		for _, eachStudent := range findStudentAgain {
+			println("student_id: ", eachStudent.StudentId,
+				"student_type: ", eachStudent.StudentType,
+				"gender: ", eachStudent.Gender,
+				"ethnicity: ", eachStudent.Ethnicity,
+				"birth_str: ", eachStudent.BirthStr,
+				"education_level: ", eachStudent.EducationLevel,
+				"political_status: ", eachStudent.PoliticalStatus,
+				"hometown: ", eachStudent.Hometown,
+				"gaokao_score: ", eachStudent.GaokaoScore,
+				"grade: ", eachStudent.Grade,
+				"class: ", eachStudent.Class,
+			)
 		}
-		println("******************************************************************************")
-
-		response.Success(c, gin.H{"data": "测试成功"}, "")
+		println("*******************************************************************************************************************************************************************************************************")
 	}
 }
