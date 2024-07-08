@@ -3,6 +3,7 @@ package control
 import (
 	"backend/response"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
@@ -206,13 +207,14 @@ func get_all_avg(student_id int) (returnAvgs []returnAvg, err error) {
 
 func GetAllAvg(c *gin.Context) {
 	type msg struct {
-		Id int `json:"id"`
+		Id int `form:"id"`
 	}
 
 	var m msg
-	if e := c.ShouldBindJSON(&m); e == nil {
+	if e := c.ShouldBindQuery(&m); e == nil {
 		if returnAvgs, err := get_all_avg(m.Id); err == nil {
 			response.Success(c, gin.H{"avg1": returnAvgs[0], "avg2": returnAvgs[1], "avg3": returnAvgs[2]}, "")
+			return
 		}
 		response.Fail(c, nil, "")
 	} else { //JSON解析失败

@@ -90,6 +90,12 @@ func SaveApi(c *gin.Context) {
 				}
 				//保存新值
 				aRecord := models.Api{A_uid: uint(m.Id), A_url: m.Url, A_parameter: m.Request, A_respond: m.Response, A_description: m.Desc, A_type: aType, A_name: m.Name, PU_uid: userId}
+				var puRecord models.ProjectUser
+				if e := mysql.DB.Where("U_uid = ?", userId).First(&puRecord).Error; e != nil {
+					response.Fail(c, nil, "查找项目用户时失败")
+					return
+				}
+				aRecord.PU_uid = puRecord.PU_uid
 				if e := mysql.DB.Save(&aRecord).Error; e != nil {
 					response.Fail(c, nil, "更新Api时出错")
 					return
