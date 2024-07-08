@@ -89,10 +89,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 						response.Fail(c, gin.H{"data": "连接数据源出错"}, "连接数据源出错")
 						return
 					} else {
-						//m.SqlCommand = strings.Replace(m.SqlCommand, m.ProjectName, result.PT_remote_db_name, 1)
 						m.SqlCommand = strings.Replace(m.SqlCommand, TableName, result.PT_remote_table_name, 1)
-
-						fmt.Println(m.SqlCommand)
 
 						response.Success(c, gin.H{"rowsAffected": DbOrigin.Exec(m.SqlCommand).RowsAffected}, "")
 					}

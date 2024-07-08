@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="准备完成模拟读写">
-      <change afterPath="$PROJECT_DIR$/models/Student.go" afterDir="false" />
+    <list default="true" id="88ca0ddd-a994-4817-b736-86518cc56b5b" name="Changes" comment="模拟写可以运行。">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/control/readAndWriteApi.go" beforeDir="false" afterPath="$PROJECT_DIR$/control/readAndWriteApi.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mysql/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/mysql/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/control/sign_up.go" beforeDir="false" afterPath="$PROJECT_DIR$/control/sign_up.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testReadAndWrite.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +131,10 @@
     <MESSAGE value="User 新增用户数据源 mysql 用户及密码，前端应提供相应的操作选项" />
     <MESSAGE value="修复 sql 解析存在的错误，写功能初步测试完成" />
     <MESSAGE value="准备完成模拟读写" />
-    <option name="LAST_COMMIT_MESSAGE" value="准备完成模拟读写" />
+    <MESSAGE value="模拟写bug待解决" />
+    <MESSAGE value="模拟写可以运行" />
+    <MESSAGE value="模拟写可以运行。" />
+    <option name="LAST_COMMIT_MESSAGE" value="模拟写可以运行。" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

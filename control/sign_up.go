@@ -4,6 +4,9 @@ import (
 	"backend/models"
 	"backend/mysql"
 	"backend/response"
+	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +62,10 @@ func SignUp(c *gin.Context) {
 			return
 		}
 		//向user表添加记录
-		userRecord = models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType + 1}
+		tmpUserName := generateUsername(5)
+		tmpUserPwd := generatePassword(10)
+		newMysqlUser(tmpUserName, tmpUserPwd)
+		userRecord = models.User{U_username: m.UserName, U_password: m.Password1, U_type: uType + 1, U_mysqlUserName: tmpUserName, U_mysqlUserPwd: tmpUserPwd}
 		if e := tx.Create(&userRecord).Error; e != nil {
 			tx.Rollback()
 			response.Fail(c, nil, "插入新用户信息时出错")
@@ -106,5 +112,41 @@ func SignUp(c *gin.Context) {
 		response.Success(c, gin.H{"username": m.UserName}, "")
 	} else { //JSON解析失败
 		response.Fail(c, nil, "数据格式错误!")
+	}
+}
+func generateUsername(length int) string {
+	// 初始化种子
+	rand.Seed(time.Now().UnixNano())
+
+	// 字符集
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func generatePassword(length int) string {
+	// 初始化种子
+	rand.Seed(time.Now().UnixNano())
+
+	// 字符集
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func newMysqlUser(user string, password string) {
+	createUserSQL := "CREATE USER '" + user + "'@'localhost' IDENTIFIED BY '" + password + "';"
+
+	err := mysql.DB.Exec(createUserSQL).Error
+	if err != nil {
+		fmt.Println("mysql 用户创建失败！")
 	}
 }
