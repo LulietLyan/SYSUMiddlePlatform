@@ -33,9 +33,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 
 		// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 暂定前端需要发送以下信息
 		var m struct {
-			ProjectName string `json:"projectName"`
-			TableName   string `json:"tableName"`
-			SqlCommand  string `json:"sqlCommand"`
+			SqlCommand string `json:"sqlCommand"`
 		}
 		if e := c.ShouldBindJSON(&m); e != nil {
 			response.Fail(c, gin.H{"data": "请检查数据格式"}, "提交事务时出错")
@@ -59,7 +57,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 				return
 			} else {
 				// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 权限检查完毕
-
+				TableName := SQLParser.SQLTreeGenerator(m.SqlCommand).Table.TableRefs.Left.Source.Name.O
 				// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 查找数据源参数
 				var result struct {
 					PT_uid               uint   `gorm:"column:PT_uid" json:"PT_uid"`
@@ -73,11 +71,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 				err = mysql.DB.Begin().Raw(`
 					SELECT ProjectTable.PT_uid, ProjectTable.PT_remote_db_name, ProjectTable.PT_remote_table_name, ProjectTable.PT_remote_hostname, ProjectTable.PT_remote_userName , ProjectTable.PT_remote_password, ProjectTable.PT_remote_port 
 					FROM User, ProjectUser, ProjectTable
-					WHERE ProjectTable.PT_name=? AND User.U_uid = ProjectUser.U_uid AND ProjectTable.PU_uid=? AND ProjectUser.PU_uid = ProjectTable.PU_uid`, m.TableName, pu_uid).First(&result).Error
-
-				m.TableName = SQLParser.SQLTreeGenerator(m.SqlCommand).Table.TableRefs.Left.Source.Name.O
-
-				fmt.Println(m.TableName)
+					WHERE ProjectTable.PT_name=? AND User.U_uid = ProjectUser.U_uid AND ProjectTable.PU_uid=? AND ProjectUser.PU_uid = ProjectTable.PU_uid`, TableName, pu_uid).First(&result).Error
 
 				if err != nil {
 					response.Fail(c, gin.H{"data": "无相关项目"}, "查找表时出错")
@@ -96,7 +90,7 @@ func InterpretUserWritingRequest(c *gin.Context) {
 						return
 					} else {
 						//m.SqlCommand = strings.Replace(m.SqlCommand, m.ProjectName, result.PT_remote_db_name, 1)
-						m.SqlCommand = strings.Replace(m.SqlCommand, m.TableName, result.PT_remote_table_name, 1)
+						m.SqlCommand = strings.Replace(m.SqlCommand, TableName, result.PT_remote_table_name, 1)
 
 						fmt.Println(m.SqlCommand)
 
