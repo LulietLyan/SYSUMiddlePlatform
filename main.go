@@ -50,9 +50,9 @@ func Execute() error {
 		); err != nil {
 			return err
 		}
-		// if err := control.InitDataSync(); err != nil {
-		// 	return err
-		// }
+		if err := control.InitDataSync(); err != nil {
+			return err
+		}
 
 		// 最后别忘了把连接关了
 		defer mysql.DB.Close()

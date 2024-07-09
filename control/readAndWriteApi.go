@@ -8,12 +8,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -43,21 +44,22 @@ func InterpretUserWritingRequest(c *gin.Context) {
 
 			// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 检查权限
 			var authType struct {
-				PT_uid  uint `gorm:"column:P_uid;primary_key" json:"P_uid"`
-				P_level uint `gorm:"column:P_level" json:"P_level"`
+				PT_uid  uint `gorm:"column:PT_uid"`
+				P_level uint `gorm:"column:P_level"`
 			}
-
+			TableName := SQLParser.SQLTreeGenerator(m.SqlCommand).Table.TableRefs.Left.Source.Name.O
 			err := mysql.DB.Begin().Raw(`
 				SELECT Permission.PT_uid, Permission.P_level
 				FROM Permission, ProjectTable 
-				WHERE Permission.pu_uid=? AND Permission.PT_uid = ProjectTable.PT_uid`, pu_uid).First(&authType).Error
+				WHERE Permission.pu_uid=? AND Permission.PT_uid = ProjectTable.PT_uid AND ProjectTable.PT_name=?`, pu_uid, TableName).First(&authType).Error
 			// 用户必须具有写权限，否则毫无意义
-			if err != nil && authType.P_level < 2 {
-				response.Fail(c, gin.H{"data": "无权限"}, "检查权限时出错")
+			fmt.Println(authType.P_level)
+			if err != nil || authType.P_level < 2 {
+				response.Fail(c, gin.H{"data": "无权限"}, "权限不足")
 				return
 			} else {
 				// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 权限检查完毕
-				TableName := SQLParser.SQLTreeGenerator(m.SqlCommand).Table.TableRefs.Left.Source.Name.O
+
 				// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 查找数据源参数
 				var result struct {
 					PT_uid               uint   `gorm:"column:PT_uid" json:"PT_uid"`
@@ -70,11 +72,13 @@ func InterpretUserWritingRequest(c *gin.Context) {
 				}
 				err = mysql.DB.Begin().Raw(`
 					SELECT ProjectTable.PT_uid, ProjectTable.PT_remote_db_name, ProjectTable.PT_remote_table_name, ProjectTable.PT_remote_hostname, ProjectTable.PT_remote_userName , ProjectTable.PT_remote_password, ProjectTable.PT_remote_port 
-					FROM User, ProjectUser, ProjectTable
-					WHERE ProjectTable.PT_name=? AND User.U_uid = ProjectUser.U_uid AND ProjectTable.PU_uid=? AND ProjectUser.PU_uid = ProjectTable.PU_uid`, TableName, pu_uid).First(&result).Error
+					FROM ProjectTable
+					WHERE ProjectTable.PT_uid=?`, authType.PT_uid).First(&result).Error
 
 				if err != nil {
-					response.Fail(c, gin.H{"data": "无相关项目"}, "查找表时出错")
+					fmt.Println(authType.PT_uid)
+					fmt.Println(err.Error())
+					response.Fail(c, nil, "查找表时出错")
 					return
 				} else {
 					// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 查找数据源参数
@@ -83,10 +87,10 @@ func InterpretUserWritingRequest(c *gin.Context) {
 					// 首先连接用户数据源
 					DbOrigin, e := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name))
 
-					println(result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name)
+					// println(result.PT_remote_userName, result.PT_remote_password, result.PT_remote_hostname, result.PT_remote_port, result.PT_remote_db_name)
 
 					if e != nil {
-						response.Fail(c, gin.H{"data": "连接数据源出错"}, "连接数据源出错")
+						response.Fail(c, nil, "连接数据源出错")
 						return
 					} else {
 						m.SqlCommand = strings.Replace(m.SqlCommand, TableName, result.PT_remote_table_name, 1)
