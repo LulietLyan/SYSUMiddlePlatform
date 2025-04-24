@@ -2,8 +2,8 @@
 
 <p align="center"> 
   <a href="https://github.com/LulietLyan?tab=followers"> <img src="https://img.shields.io/github/followers/LulietLyan?label=Followers&style=for-the-badge&color=purple" height="25px" alt="github follow" > </a>
-  <a href="https://github.com/LulietLyan/Software-Engineering-Comprehensive-Training?tab=stars"> <img src="https://img.shields.io/github/stars/LulietLyan/Software-Engineering-Comprehensive-Training?label=Stars&style=for-the-badge" height="25px" alt="github repo stars" > </a>
-  <a href="https://github.com/LulietLyan/InterviewBasic"> <img src="https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge" height="25px" alt="github repo stars" > </a>
+  <a href="https://github.com/LulietLyan/SYSUMiddlePlatform?tab=stars"> <img src="https://img.shields.io/github/stars/LulietLyan/SYSUMiddlePlatform?label=Stars&style=for-the-badge" height="25px" alt="github repo stars" > </a>
+  <a href="https://github.com/LulietLyan/SYSUMiddlePlatform"> <img src="https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge" height="25px" alt="github repo stars" > </a>
 </p> 
 
 ---
