@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtKey = []byte("a_secret_crect")
+var jwtKey = []byte("xxxxxxx")
 
 // type Claims struct {
 // 	UserId uint
