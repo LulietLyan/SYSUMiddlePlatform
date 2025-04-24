@@ -38,11 +38,11 @@ func main() {
 }
 
 func Execute() error {
-	// viper 用来取 config/dev.yaml中的参数
+	// viper 解析 config/dev.yaml 参数
 	rootCmd.RunE = func(cmd *cobra.Command, args []string) error {
 		// mysql.DB.AutoMigrate(&models.User{}, &models.PresetBackground{}) // 将数据库的表自动映射为User
 		if _, err := mysql.Init( //建立连接
-			viper.GetString("db.hostname"), // 用viper将对应的参数取出来
+			viper.GetString("db.hostname"),
 			viper.GetInt("db.port"),
 			viper.GetString("db.username"),
 			viper.GetString("db.password"),
@@ -54,7 +54,7 @@ func Execute() error {
 			return err
 		}
 
-		// 最后别忘了把连接关了
+		// 关闭连接
 		defer mysql.DB.Close()
 		defer mysql.DB_Authorize.Close()
 		defer mysql.DB_Demon.Close()
