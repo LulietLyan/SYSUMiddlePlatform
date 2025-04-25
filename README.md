@@ -1,4 +1,4 @@
-<h1 align="center">SYSU Middle Platform</h1>
+<h1 align="center">SYSUMidPlatform</h1>
 
 <p align="center"> 
   <a href="https://github.com/LulietLyan?tab=followers"> <img src="https://img.shields.io/github/followers/LulietLyan?label=Followers&style=for-the-badge&color=purple" height="25px" alt="github follow" > </a>
@@ -28,7 +28,7 @@
 
 # 🤗 Introduction
 
-**SYSU Middle Platform** 是一款基于 Gin-Vue 框架的简单的数据中台项目，涉及以下技术栈：
+**SYSUMidPlatform** 是一款基于 Gin-Vue 框架的简单的数据中台项目，涉及以下技术栈：
 ![技术栈](./image/TeckStack.png)
 
 下面重点介绍数据同步与存储、数据分析方面：
