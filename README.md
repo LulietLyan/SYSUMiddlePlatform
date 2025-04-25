@@ -114,94 +114,94 @@
             }
         }
     ```
-- 配置
-  ```xml
-    <?xml version="1.0" encoding="UTF-8"?>
-    <project xmlns="http://maven.apache.org/POM/4.0.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-        <modelVersion>4.0.0</modelVersion>
+  - 配置
+    ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
 
-        <groupId>com.demo.flink</groupId>
-        <artifactId>flinkdemo</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <packaging>jar</packaging>
+          <groupId>com.demo.flink</groupId>
+          <artifactId>flinkdemo</artifactId>
+          <version>1.0-SNAPSHOT</version>
+          <packaging>jar</packaging>
 
-        <properties>
-            <maven.compiler.source>8</maven.compiler.source>
-            <maven.compiler.target>8</maven.compiler.target>
-            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-            <flink.version>1.16.0</flink.version>
-            <flink-cdc.version>2.3.0</flink-cdc.version>
-        </properties>
+          <properties>
+              <maven.compiler.source>8</maven.compiler.source>
+              <maven.compiler.target>8</maven.compiler.target>
+              <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+              <flink.version>1.16.0</flink.version>
+              <flink-cdc.version>2.3.0</flink-cdc.version>
+          </properties>
 
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-java</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-clients</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-streaming-java</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-api-java-bridge</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-planner-loader</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-runtime</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-base</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-jdbc</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ververica</groupId>
-                <artifactId>flink-sql-connector-MySQL-cdc</artifactId>
-                <version>${flink-cdc.version}</version>
-            </dependency>
-        </dependencies>
+          <dependencies>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-java</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-clients</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-streaming-java</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-table-api-java-bridge</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-table-planner-loader</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-table-runtime</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-connector-base</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.apache.flink</groupId>
+                  <artifactId>flink-connector-jdbc</artifactId>
+                  <version>${flink.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>com.ververica</groupId>
+                  <artifactId>flink-sql-connector-MySQL-cdc</artifactId>
+                  <version>${flink-cdc.version}</version>
+              </dependency>
+          </dependencies>
 
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <addClasspath>true</addClasspath>
-                                <mainClass>com.demo.flink.FlinkCdcMySql</mainClass>
-                            </manifest>
-                        </archive>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </project>
-  ```
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-jar-plugin</artifactId>
+                      <version>3.2.0</version>
+                      <configuration>
+                          <archive>
+                              <manifest>
+                                  <addClasspath>true</addClasspath>
+                                  <mainClass>com.demo.flink.FlinkCdcMySql</mainClass>
+                              </manifest>
+                          </archive>
+                      </configuration>
+                  </plugin>
+              </plugins>
+          </build>
+      </project>
+    ```
 - [IDEA 的 Maven 配置](https://blog.csdn.net/kkkyyy0817/article/details/136544187)
 - [打包 JAVA 代码](https://blog.csdn.net/weixin_53036603/article/details/128211312)(命令行：java -cp "xxx.jar;libs/*" xxx.xxx)
 
